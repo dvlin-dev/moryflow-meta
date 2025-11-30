@@ -12,9 +12,9 @@ hero:
     - theme: alt
       text: 下载应用
       link: /zh/getting-started/installation
-  image:
-    src: /logo-light.png
-    alt: MoryFlow Logo
+  # image:
+  #   src: /logo-light.png
+  #   alt: MoryFlow Logo
 features:
   - title: 记得住你说过的话
     details: Mory 会读你的笔记，了解你的习惯和偏好。聊得越多，越懂你想要什么。

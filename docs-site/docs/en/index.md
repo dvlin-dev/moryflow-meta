@@ -12,9 +12,9 @@ hero:
     - theme: alt
       text: Download
       link: /en/getting-started/installation
-  image:
-    src: /logo-light.png
-    alt: MoryFlow Logo
+  # image:
+  #   src: /logo-light.png
+  #   alt: MoryFlow Logo
 features:
   - title: Remembers What You've Said
     details: Mory reads your notes and learns your habits and preferences. The more you chat, the better it understands you.

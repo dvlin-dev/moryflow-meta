@@ -79,11 +79,11 @@ async function detectFastestMirror(): Promise<{
     github: null,
   }
 
-  // 测试 URL
+  // 测试 URL - 使用实际可访问的端点
   const testUrls: Record<MirrorType, string> = {
     cloudflare: `${MIRRORS.cloudflare}/manifest.json`,
-    // GitHub releases 不支持 HEAD，用 API 测试连通性
-    github: 'https://api.github.com/repos/dvlin-dev/moryflow/releases/latest',
+    // 使用 GitHub raw 文件测试连通性（比 API 更可靠）
+    github: 'https://raw.githubusercontent.com/dvlin-dev/moryflow/master/README.md',
   }
 
   // 并行测试所有镜像
@@ -135,14 +135,63 @@ export function useDownloadMirror(): UseDownloadMirrorReturn {
     if (hasDetected.current) return
     hasDetected.current = true
 
+    // 从 GitHub Releases API 构建 manifest（备用方案）
+    const fetchFromGitHub = async (): Promise<DownloadManifest> => {
+      const res = await fetch('https://api.github.com/repos/dvlin-dev/moryflow/releases')
+      if (!res.ok) throw new Error('GitHub API failed')
+      const releases = await res.json()
+      // 找到最新的非 draft release
+      const latest = releases.find((r: { draft: boolean }) => !r.draft)
+      if (!latest) throw new Error('No releases found')
+
+      const version = latest.tag_name.replace(/^v/, '')
+      const assets = latest.assets as Array<{ name: string; browser_download_url: string }>
+
+      const findAsset = (pattern: RegExp) => {
+        const asset = assets.find(a => pattern.test(a.name))
+        return asset ? { filename: asset.name, url: asset.browser_download_url } : null
+      }
+
+      const mac = findAsset(/\.dmg$/)
+      // 优先匹配 Setup 安装程序，排除 elevate.exe 等辅助文件
+      const win = findAsset(/Setup.*\.exe$/) || findAsset(/MoryFlow-.*\.exe$/)
+      const linux = findAsset(/\.AppImage$/)
+
+      return {
+        version,
+        releaseDate: latest.published_at,
+        downloads: {
+          'mac-arm64': {
+            filename: mac?.filename ?? '',
+            cloudflare: mac ? `https://download.moryflow.com/${version}/${mac.filename}` : '',
+            github: mac?.url ?? '',
+          },
+          'win-x64': {
+            filename: win?.filename ?? '',
+            cloudflare: win ? `https://download.moryflow.com/${version}/${win.filename}` : '',
+            github: win?.url ?? '',
+          },
+          'linux-x64': {
+            filename: linux?.filename ?? '',
+            cloudflare: linux ? `https://download.moryflow.com/${version}/${linux.filename}` : '',
+            github: linux?.url ?? '',
+          },
+        },
+      }
+    }
+
     const init = async () => {
       // 并行执行：获取 manifest + 检测镜像
       const [manifestResult, mirrorResult] = await Promise.allSettled([
-        // 获取 manifest
+        // 优先从 Cloudflare 获取 manifest，失败则从 GitHub 获取
         fetch(`${MIRRORS.cloudflare}/manifest.json?_t=${Date.now()}`)
           .then(res => {
-            if (!res.ok) throw new Error('Failed to fetch manifest')
+            if (!res.ok) throw new Error('Failed to fetch manifest from Cloudflare')
             return res.json() as Promise<DownloadManifest>
+          })
+          .catch(async (err) => {
+            console.warn('Cloudflare manifest failed, trying GitHub:', err.message)
+            return fetchFromGitHub()
           }),
         // 检测镜像
         detectFastestMirror(),

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-const DOWNLOAD_BASE = 'https://2c15b2378d6a15c79459ded5a908974a.r2.cloudflarestorage.com/moryflow-releases'
+const DOWNLOAD_BASE = 'https://download.moryflow.com'
 
 interface Manifest {
   version: string
@@ -52,8 +52,8 @@ export function DownloadButtons({ lang = 'en' }: DownloadButtonsProps) {
 
   useEffect(() => {
     fetch(`${DOWNLOAD_BASE}/manifest.json?_t=${Date.now()}`)
-      .then(res => res.json())
-      .then(data => setManifest(data))
+      .then((res) => res.json())
+      .then((data) => setManifest(data))
       .catch(console.error)
       .finally(() => setIsLoading(false))
   }, [])
@@ -65,8 +65,8 @@ export function DownloadButtons({ lang = 'en' }: DownloadButtonsProps) {
     const info = manifest.downloads[key]
     if (!info?.cloudflare) return
 
-    setDownloadStates(prev => ({ ...prev, [platform]: 'preparing' }))
-    await new Promise(r => setTimeout(r, 300))
+    setDownloadStates((prev) => ({ ...prev, [platform]: 'preparing' }))
+    await new Promise((r) => setTimeout(r, 300))
 
     const link = document.createElement('a')
     link.href = info.cloudflare
@@ -75,9 +75,9 @@ export function DownloadButtons({ lang = 'en' }: DownloadButtonsProps) {
     link.click()
     document.body.removeChild(link)
 
-    setDownloadStates(prev => ({ ...prev, [platform]: 'downloading' }))
+    setDownloadStates((prev) => ({ ...prev, [platform]: 'downloading' }))
     setTimeout(() => {
-      setDownloadStates(prev => ({ ...prev, [platform]: 'idle' }))
+      setDownloadStates((prev) => ({ ...prev, [platform]: 'idle' }))
     }, 3000)
   }
 

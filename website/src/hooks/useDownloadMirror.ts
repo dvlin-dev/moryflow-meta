@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 
-const DOWNLOAD_BASE = 'https://2c15b2378d6a15c79459ded5a908974a.r2.cloudflarestorage.com/moryflow-releases'
+const DOWNLOAD_BASE = 'https://download.moryflow.com'
 
 type Platform = 'mac' | 'win' | 'linux'
 
@@ -59,36 +59,42 @@ export function useDownload(): UseDownloadReturn {
   }, [])
 
   // 获取下载信息
-  const getDownloadInfo = useCallback((platform: Platform): DownloadInfo | null => {
-    if (!manifest) return null
+  const getDownloadInfo = useCallback(
+    (platform: Platform): DownloadInfo | null => {
+      if (!manifest) return null
 
-    const key = PLATFORM_MAP[platform]
-    const info = manifest.downloads[key]
+      const key = PLATFORM_MAP[platform]
+      const info = manifest.downloads[key]
 
-    if (!info?.filename || !info?.cloudflare) return null
+      if (!info?.filename || !info?.cloudflare) return null
 
-    return {
-      filename: info.filename,
-      url: info.cloudflare,
-    }
-  }, [manifest])
+      return {
+        filename: info.filename,
+        url: info.cloudflare,
+      }
+    },
+    [manifest]
+  )
 
   // 触发下载
-  const startDownload = useCallback(async (platform: Platform): Promise<boolean> => {
-    const info = getDownloadInfo(platform)
-    if (!info) return false
+  const startDownload = useCallback(
+    async (platform: Platform): Promise<boolean> => {
+      const info = getDownloadInfo(platform)
+      if (!info) return false
 
-    // 创建隐藏的 a 标签触发下载
-    const link = document.createElement('a')
-    link.href = info.url
-    link.download = info.filename
-    link.style.display = 'none'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+      // 创建隐藏的 a 标签触发下载
+      const link = document.createElement('a')
+      link.href = info.url
+      link.download = info.filename
+      link.style.display = 'none'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
 
-    return true
-  }, [getDownloadInfo])
+      return true
+    },
+    [getDownloadInfo]
+  )
 
   return {
     version: manifest?.version ?? null,

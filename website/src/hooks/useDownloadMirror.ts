@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 
-const DOWNLOAD_BASE = 'https://download.moryflow.com'
+const DOWNLOAD_BASE = 'https://2c15b2378d6a15c79459ded5a908974a.r2.cloudflarestorage.com/moryflow-releases'
 
 type Platform = 'mac' | 'win' | 'linux'
 

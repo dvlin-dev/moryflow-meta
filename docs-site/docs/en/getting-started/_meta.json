@@ -1,0 +1,6 @@
+[
+  { "type": "file", "name": "index", "label": "What is MoryFlow" },
+  { "type": "file", "name": "installation", "label": "Download & Install" },
+  { "type": "file", "name": "first-note", "label": "Create Your First Note" },
+  { "type": "file", "name": "first-chat", "label": "Your First Chat" }
+]

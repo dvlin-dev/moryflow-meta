@@ -1,0 +1,57 @@
+# 下载安装
+
+MoryFlow 支持 macOS 和 Windows。
+
+## 系统要求
+
+**macOS**
+- macOS 10.15 或更新
+- M 系列芯片或 Intel 都行
+- 4GB 以上内存
+
+**Windows**
+- Windows 10 或更新
+- 64 位系统
+- 4GB 以上内存
+
+## 下载
+
+去 [MoryFlow 官网](https://moryflow.com) 下载最新版。
+
+<!-- 截图占位符：下载页面 -->
+![下载页面](/images/settings/download-page.png)
+
+## macOS 安装
+
+1. 下载 `.dmg` 文件
+2. 双击打开
+3. 把 MoryFlow 拖到「应用程序」文件夹
+4. 第一次打开可能会提示"无法验证开发者"，去「系统设置」→「隐私与安全性」点「仍要打开」就行
+
+## Windows 安装
+
+1. 下载 `.exe` 安装包
+2. 双击运行
+3. 跟着向导走完就好
+
+## 第一次打开
+
+打开 MoryFlow，它会让你选一个**文件夹**来存放笔记。
+
+:::tip 为什么要选文件夹？
+MoryFlow 的笔记都是普通的文本文件（Markdown 格式），就存在你指定的文件夹里。你可以用任何编辑器打开它们，也可以把这个文件夹放到云盘里同步。
+:::
+
+<!-- 截图占位符：选择文件夹界面 -->
+![选择笔记文件夹](/images/vault/select-vault.png)
+
+**建议放在这里：**
+
+- **Mac**：`文稿/MoryFlow` 或 iCloud 云盘里
+- **Windows**：`文档\MoryFlow` 或 OneDrive 里
+
+放在云盘目录下就能自动同步到其他设备，详见 [多设备同步](/zh/advanced/sync)。
+
+## 下一步
+
+装好了？来 [写第一篇笔记](/zh/getting-started/first-note) 吧。

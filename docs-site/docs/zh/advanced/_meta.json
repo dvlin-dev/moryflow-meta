@@ -1,0 +1,6 @@
+[
+  { "type": "file", "name": "index", "label": "进阶概览" },
+  { "type": "file", "name": "prompt-tips", "label": "提示词技巧" },
+  { "type": "file", "name": "file-organization", "label": "文件组织" },
+  { "type": "file", "name": "sync", "label": "多设备同步" }
+]

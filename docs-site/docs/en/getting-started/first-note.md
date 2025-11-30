@@ -1,0 +1,90 @@
+# Create Your First Note
+
+After choosing your folder, you're in the main interface. Let's write something.
+
+## Create a New Note
+
+A few ways to do this:
+
+**Click the button**
+1. At the top of the file list on the left, there's a **+** button
+2. Click it, choose "New Note"
+3. Type a name, hit Enter
+
+<!-- Screenshot placeholder: new note button -->
+![New Note](/images/vault/new-note-button.png)
+
+**Right-click menu**
+
+Right-click in the empty space on the left → New Note → type a name
+
+**Keyboard shortcut**
+
+- Mac: `⌘ + N`
+- Windows: `Ctrl + N`
+
+## Start Writing
+
+Once your note is created, just start typing in the editor area.
+
+### Slash Commands
+
+Type `/` to bring up a quick menu for inserting things:
+
+<!-- Screenshot placeholder: slash command menu -->
+![Slash Commands](/images/editor/slash-menu.png)
+
+| Type | Inserts |
+|------|---------|
+| `/h1` `/h2` `/h3` | Headings |
+| `/bullet` | Bullet list |
+| `/todo` | To-do checklist |
+| `/code` | Code block |
+| `/table` | Table |
+
+### Markdown Syntax
+
+If you know Markdown, just type it directly:
+
+```markdown
+# Big heading
+## Smaller heading
+- List item
+- [ ] To-do item
+> Quote
+**bold** *italic*
+```
+
+### When You Select Text
+
+Select some text and a small toolbar appears—quickly make it bold, italic, change color, etc.
+
+<!-- Screenshot placeholder: floating toolbar -->
+![Toolbar](/images/editor/floating-toolbar.png)
+
+## Auto-Save
+
+Just write—MoryFlow **saves automatically**. You don't have to think about it.
+
+The top right shows save status:
+- ✓ Saved
+- ○ Saving
+- ✗ Error
+
+## Organize Your Notes
+
+### Create Folders
+
+Right-click in the empty space on the left → New Folder
+
+### Move Notes
+
+Just drag and drop, or right-click → Move to...
+
+### Rename
+
+Right-click → Rename, or select and press `F2`
+
+## Next Step
+
+Got your note? Let's [chat with Mory](/en/getting-started/first-chat) and see what it can do for you.

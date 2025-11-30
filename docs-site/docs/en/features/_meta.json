@@ -1,0 +1,8 @@
+[
+  { "type": "file", "name": "index", "label": "Overview" },
+  { "type": "file", "name": "vault", "label": "Notes Folder" },
+  { "type": "file", "name": "editor", "label": "Editor" },
+  { "type": "file", "name": "ai-assistant", "label": "Mory AI Assistant" },
+  { "type": "file", "name": "ai-tools", "label": "Mory's Tools" },
+  { "type": "file", "name": "mcp", "label": "MCP Extensions" }
+]

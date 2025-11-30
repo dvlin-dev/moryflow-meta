@@ -1,0 +1,8 @@
+[
+  { "type": "file", "name": "index", "label": "使用指南" },
+  { "type": "file", "name": "study-prep", "label": "准备考试" },
+  { "type": "file", "name": "event-planning", "label": "策划活动" },
+  { "type": "file", "name": "travel-planning", "label": "规划旅行" },
+  { "type": "file", "name": "work-summary", "label": "写工作总结" },
+  { "type": "file", "name": "knowledge-base", "label": "构建知识库" }
+]

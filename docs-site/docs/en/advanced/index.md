@@ -1,0 +1,39 @@
+# Advanced Usage
+
+Master these advanced skills to get more out of MoryFlow.
+
+## In This Chapter
+
+### Prompt Tips
+
+Learn how to communicate with Mory so it better understands what you mean.
+
+[View Prompt Tips →](/en/advanced/prompt-tips)
+
+### File Organization Best Practices
+
+Build a sensible note structure so finding things is easier.
+
+[View File Organization Best Practices →](/en/advanced/file-organization)
+
+### Multi-device Sync
+
+Sync notes across multiple devices, use anywhere, anytime.
+
+[View Multi-device Sync Options →](/en/advanced/sync)
+
+## Advanced Skills Overview
+
+| Skill | Difficulty | What it's for |
+|-------|------------|---------------|
+| Prompt Tips | ⭐⭐ | Get more accurate responses from Mory |
+| File Organization | ⭐⭐ | Find things faster |
+| Multi-device Sync | ⭐⭐⭐ | Use anywhere, anytime |
+
+## Keep Learning
+
+MoryFlow is constantly evolving. We suggest:
+
+- Follow the changelog for new features
+- Join the community and connect with other users
+- Experiment and discover new ways to use it

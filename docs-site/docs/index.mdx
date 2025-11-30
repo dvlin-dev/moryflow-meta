@@ -1,0 +1,29 @@
+export const getRedirectLang = () => {
+  if (typeof window === 'undefined') return 'en';
+  const lang = navigator.language || navigator.userLanguage || 'en';
+  return lang.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+};
+
+export const Redirect = () => {
+  if (typeof window !== 'undefined') {
+    const targetLang = getRedirectLang();
+    window.location.replace('/' + targetLang + '/');
+  }
+  return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '80vh',
+      flexDirection: 'column'
+    }}>
+      <p style={{ fontSize: '18px', color: '#666' }}>Redirecting...</p>
+      <p style={{ marginTop: '20px' }}>
+        <a href="/en/" style={{ marginRight: '20px' }}>English</a>
+        <a href="/zh/">简体中文</a>
+      </p>
+    </div>
+  );
+};
+
+<Redirect />

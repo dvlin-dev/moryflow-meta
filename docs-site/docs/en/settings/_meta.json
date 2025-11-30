@@ -1,0 +1,7 @@
+[
+  { "type": "file", "name": "index", "label": "Settings Overview" },
+  { "type": "file", "name": "ai-models", "label": "AI Model Configuration" },
+  { "type": "file", "name": "ollama", "label": "Ollama Local Models" },
+  { "type": "file", "name": "custom-provider", "label": "Custom Providers" },
+  { "type": "file", "name": "theme", "label": "Theme Settings" }
+]

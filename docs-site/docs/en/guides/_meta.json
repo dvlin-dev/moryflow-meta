@@ -1,0 +1,8 @@
+[
+  { "type": "file", "name": "index", "label": "Guide Overview" },
+  { "type": "file", "name": "study-prep", "label": "Exam Preparation" },
+  { "type": "file", "name": "event-planning", "label": "Event Planning" },
+  { "type": "file", "name": "travel-planning", "label": "Travel Planning" },
+  { "type": "file", "name": "work-summary", "label": "Work Summaries" },
+  { "type": "file", "name": "knowledge-base", "label": "Building Knowledge Base" }
+]

@@ -1,0 +1,6 @@
+[
+  { "type": "file", "name": "index", "label": "Advanced Overview" },
+  { "type": "file", "name": "prompt-tips", "label": "Prompt Tips" },
+  { "type": "file", "name": "file-organization", "label": "File Organization" },
+  { "type": "file", "name": "sync", "label": "Multi-device Sync" }
+]

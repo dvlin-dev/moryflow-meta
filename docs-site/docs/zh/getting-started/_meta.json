@@ -1,0 +1,6 @@
+[
+  { "type": "file", "name": "index", "label": "什么是 MoryFlow" },
+  { "type": "file", "name": "installation", "label": "下载与安装" },
+  { "type": "file", "name": "first-note", "label": "创建第一篇笔记" },
+  { "type": "file", "name": "first-chat", "label": "第一次对话" }
+]

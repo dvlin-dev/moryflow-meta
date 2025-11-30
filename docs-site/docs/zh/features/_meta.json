@@ -1,0 +1,8 @@
+[
+  { "type": "file", "name": "index", "label": "功能概览" },
+  { "type": "file", "name": "vault", "label": "笔记文件夹" },
+  { "type": "file", "name": "editor", "label": "编辑器" },
+  { "type": "file", "name": "ai-assistant", "label": "Mory 智能助手" },
+  { "type": "file", "name": "ai-tools", "label": "Mory 的工具" },
+  { "type": "file", "name": "mcp", "label": "MCP 扩展" }
+]

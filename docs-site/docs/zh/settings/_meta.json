@@ -1,0 +1,7 @@
+[
+  { "type": "file", "name": "index", "label": "设置概览" },
+  { "type": "file", "name": "ai-models", "label": "AI 模型配置" },
+  { "type": "file", "name": "ollama", "label": "Ollama 本地模型" },
+  { "type": "file", "name": "custom-provider", "label": "自定义服务商" },
+  { "type": "file", "name": "theme", "label": "主题设置" }
+]

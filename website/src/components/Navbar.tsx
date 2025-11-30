@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import { Download, BookOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import logoSvg from '@/assets/logo.svg'
@@ -24,7 +23,7 @@ export default function Navbar() {
   }
 
   return (
-    <motion.nav
+    <nav
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 sm:px-8 py-4',
         isScrolled ? 'pt-4' : 'pt-6'
@@ -49,25 +48,26 @@ export default function Navbar() {
         </Link>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <a
             href="https://docs.moryflow.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-sm font-medium text-mory-text-secondary hover:text-mory-orange transition-colors"
+            className="flex items-center gap-1.5 text-sm font-medium text-mory-text-secondary hover:text-mory-orange transition-colors p-2 sm:p-0"
+            title="使用文档"
           >
-            <BookOpen size={16} />
-            <span>使用文档</span>
+            <BookOpen size={18} className="sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">文档</span>
           </a>
           <button
             onClick={scrollToDownload}
-            className="flex items-center gap-2 bg-mory-text-primary text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+            className="flex items-center gap-1.5 sm:gap-2 bg-mory-text-primary text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-sm font-medium hover:bg-black transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
           >
             <Download size={16} />
-            <span>下载</span>
+            <span className="hidden sm:inline">下载</span>
           </button>
         </div>
       </div>
-    </motion.nav>
+    </nav>
   )
 }

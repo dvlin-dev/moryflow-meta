@@ -1,5 +1,4 @@
 
-import { motion } from 'framer-motion';
 import { CheckCircle2, Sparkles } from 'lucide-react';
 
 const scenarios = [
@@ -64,27 +63,21 @@ const scenarios = [
 
 export default function AgentShowcaseWarmer() {
   return (
-    <section className="py-32 px-4 sm:px-6 bg-mory-bg relative overflow-hidden">
-      
+    <section className="py-16 sm:py-32 px-4 sm:px-6 bg-mory-bg relative overflow-hidden">
+
       {/* Background decoration */}
       <div className="absolute top-20 right-0 w-96 h-96 bg-mory-orange/5 rounded-full blur-3xl" />
       <div className="absolute bottom-20 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
 
       <div className="container mx-auto max-w-7xl relative z-10">
-        
+
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-20"
-        >
+        <div className="text-center mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-2 glass-panel bg-white/95 backdrop-blur-md rounded-full border border-white/80 shadow-sm shadow-gray-200/30 mb-6">
             <Sparkles size={16} className="text-mory-orange" />
             <span className="text-sm font-medium text-mory-text-primary">会思考的伙伴</span>
           </div>
-          
+
           <h2 className="font-serif text-4xl md:text-6xl font-bold text-mory-text-primary mb-6">
             Mory 能帮你做什么？
           </h2>
@@ -92,21 +85,13 @@ export default function AgentShowcaseWarmer() {
             不管是学习、工作还是生活，<br />
             <span className="font-medium text-mory-text-primary">只要你说出来，它就能帮你搞定。</span>
           </p>
-        </motion.div>
+        </div>
 
         {/* Scenarios Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
           {scenarios.map((scenario, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ 
-                duration: 0.6, 
-                delay: index * 0.15,
-                ease: [0.25, 0.4, 0.25, 1]
-              }}
               className="group bg-white rounded-3xl p-8 border border-gray-100 hover:border-mory-orange/30 transition-all hover:-translate-y-1"
             >
               {/* Icon & Title */}
@@ -158,18 +143,12 @@ export default function AgentShowcaseWarmer() {
                   💡 {scenario.highlight}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Bottom Explanation */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-4xl mx-auto text-center"
-        >
+        <div className="max-w-4xl mx-auto text-center">
           <div className="p-8 glass-panel bg-gradient-to-br from-white/96 to-white/92 backdrop-blur-lg rounded-3xl border border-white/85 shadow-[0_4px_24px_0_rgba(0,0,0,0.04)] shadow-gray-200/50">
             <p className="text-base text-mory-text-secondary leading-relaxed mb-4">
               Mory 拥有越来越多的能力，<br />
@@ -179,7 +158,7 @@ export default function AgentShowcaseWarmer() {
               你不需要告诉它每一步怎么做，只需要说你想要什么结果。
             </p>
           </div>
-        </motion.div>
+        </div>
 
       </div>
     </section>

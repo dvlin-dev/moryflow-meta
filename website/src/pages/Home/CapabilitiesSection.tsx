@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { FileText, Globe, PenTool } from 'lucide-react';
 
 const capabilities = [
@@ -58,22 +57,16 @@ const capabilities = [
 
 export default function CapabilitiesSection() {
   return (
-    <section id="capabilities" className="py-32 px-4 sm:px-6 bg-gradient-to-b from-mory-bg/30 via-mory-bg/50 to-mory-bg relative overflow-hidden">
-      
+    <section id="capabilities" className="py-16 sm:py-32 px-4 sm:px-6 bg-gradient-to-b from-mory-bg/30 via-mory-bg/50 to-mory-bg relative overflow-hidden">
+
       {/* Background decoration */}
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl" />
 
       <div className="container mx-auto max-w-7xl relative z-10">
-        
+
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-20"
-        >
+        <div className="text-center mb-20">
           <h2 className="font-serif text-4xl md:text-6xl font-bold text-mory-text-primary mb-6">
             Mory 为什么这么聪明？
           </h2>
@@ -81,21 +74,13 @@ export default function CapabilitiesSection() {
             它不仅有各种能力，还会记住你的一切。<br />
             <span className="font-medium text-mory-text-primary">用得越多，越懂你。</span>
           </p>
-        </motion.div>
+        </div>
 
         {/* Capabilities Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {capabilities.map((capability, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ 
-                duration: 0.6, 
-                delay: index * 0.2,
-                ease: [0.25, 0.4, 0.25, 1]
-              }}
               className="group relative"
             >
               {/* Card with colored glow */}
@@ -104,20 +89,20 @@ export default function CapabilitiesSection() {
                 {!capability.isFuture && (
                   <div className={`absolute inset-0 bg-gradient-to-br ${capability.color} opacity-0 group-hover:opacity-10 rounded-3xl blur-2xl transition-opacity duration-500`} />
                 )}
-                
+
                 <div className={`relative rounded-3xl p-8 border transition-all h-full flex flex-col ${
-                  capability.isFuture 
-                    ? 'glass-panel bg-white/70 backdrop-blur-sm border-dashed border-white/70 hover:border-white/80 shadow-md' 
+                  capability.isFuture
+                    ? 'glass-panel bg-white/70 backdrop-blur-sm border-dashed border-white/70 hover:border-white/80 shadow-md'
                     : 'glass-panel bg-white/99 backdrop-blur-lg border border-white/95 hover:bg-gradient-to-br hover:from-white hover:to-orange-50/20 hover:border-orange-200/40 hover:-translate-y-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.08),0_2px_8px_0_rgba(0,0,0,0.04)] hover:shadow-[0_16px_48px_0_rgba(0,0,0,0.12),0_4px_12px_0_rgba(0,0,0,0.06)]'
                 }`}>
-                
+
                 {/* Icon */}
                 <div className="mb-6">
                   <div className="relative inline-flex">
                     <div className={`absolute inset-0 bg-gradient-to-br ${capability.color} opacity-10 rounded-2xl blur-xl group-hover:opacity-20 transition-opacity`} />
                     <div className={`relative w-16 h-16 rounded-2xl flex items-center justify-center border shadow-sm ${
-                      capability.isFuture 
-                        ? 'glass-panel bg-white/80 backdrop-blur-sm border-white/80' 
+                      capability.isFuture
+                        ? 'glass-panel bg-white/80 backdrop-blur-sm border-white/80'
                         : 'glass-panel bg-white/98 backdrop-blur-md border-white/90 group-hover:bg-orange-50/90 shadow-gray-200/40'
                     }`}>
                       <span className="text-3xl">{capability.emoji}</span>
@@ -161,18 +146,12 @@ export default function CapabilitiesSection() {
                 </div>
               </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Bottom Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
-        >
+        <div className="text-center">
           <div className="inline-flex flex-col items-center gap-4 px-8 py-6 bg-white rounded-2xl border border-gray-100">
             <div className="flex items-center gap-2">
               <span className="text-2xl">🧠</span>
@@ -185,7 +164,7 @@ export default function CapabilitiesSection() {
               这些能力可以自由组合，<span className="font-medium text-mory-text-primary">而且还在不断增加。</span>
             </p>
           </div>
-        </motion.div>
+        </div>
 
       </div>
     </section>

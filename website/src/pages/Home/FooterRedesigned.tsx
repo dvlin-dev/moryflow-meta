@@ -1,43 +1,36 @@
-import { motion } from 'framer-motion';
 import { Mail, Heart } from 'lucide-react';
 import logoSvg from '@/assets/logo.svg';
 
 export default function FooterRedesigned() {
   return (
-    <footer className="relative py-20 px-4 sm:px-6 overflow-hidden">
-      
+    <footer className="relative py-12 sm:py-20 px-4 sm:px-6 overflow-hidden">
+
       {/* Background with gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-mory-bg via-orange-50/30 to-orange-100/40" />
-      
+
       {/* Decorative blurs */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-300/20 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-300/15 rounded-full blur-3xl" />
 
       <div className="container mx-auto max-w-6xl relative z-10">
-        
+
         {/* Main Content Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="glass-panel bg-white/60 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/40 shadow-xl mb-8"
-        >
+        <div className="glass-panel bg-white/60 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/40 shadow-xl mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-            
+
             {/* Brand Section */}
             <div className="md:col-span-2 space-y-6">
               <div className="flex items-center gap-3">
-                <img 
-                  src={logoSvg} 
-                  alt="Moryflow Logo" 
+                <img
+                  src={logoSvg}
+                  alt="Moryflow Logo"
                   className="w-10 h-10 object-contain"
                 />
                 <span className="font-serif font-bold text-2xl text-mory-text-primary">
                   Moryflow
                 </span>
               </div>
-              
+
               <div className="space-y-3">
                 <p className="text-lg text-mory-text-primary font-medium leading-relaxed">
                   Mory，你的智能伙伴
@@ -68,8 +61,8 @@ export default function FooterRedesigned() {
               </h3>
               <ul className="space-y-3">
                 <li>
-                  <a 
-                    href="mailto:hello@moryflow.com" 
+                  <a
+                    href="mailto:hello@moryflow.com"
                     className="group flex items-center gap-2 text-mory-text-secondary hover:text-mory-orange transition-colors"
                   >
                     <div className="p-2 rounded-lg bg-mory-bg group-hover:bg-orange-50 transition-colors">
@@ -82,16 +75,10 @@ export default function FooterRedesigned() {
             </div>
 
           </div>
-        </motion.div>
+        </div>
 
         {/* Bottom Bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-mory-text-muted"
-        >
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-mory-text-muted">
           <div className="flex items-center gap-2">
             <span>© 2025 Moryflow</span>
             <span className="text-gray-300">·</span>
@@ -99,13 +86,13 @@ export default function FooterRedesigned() {
               Made with <Heart size={14} className="text-mory-orange fill-mory-orange" /> for everyone
             </span>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <span className="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-mory-text-secondary border border-white/40">
               Beta
             </span>
           </div>
-        </motion.div>
+        </div>
 
       </div>
     </footer>

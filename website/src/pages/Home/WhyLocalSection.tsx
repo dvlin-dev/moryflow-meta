@@ -1,5 +1,4 @@
 
-import { motion } from 'framer-motion';
 import { Shield, Zap, Unlock, HardDrive } from 'lucide-react';
 
 const reasons = [
@@ -27,21 +26,15 @@ const reasons = [
 
 export default function WhyLocalSection() {
   return (
-    <section className="py-32 px-4 sm:px-6 bg-white relative overflow-hidden">
-      
+    <section className="py-16 sm:py-32 px-4 sm:px-6 bg-white relative overflow-hidden">
+
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] opacity-30" />
 
       <div className="container mx-auto relative z-10 max-w-6xl">
-        
+
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-20"
-        >
+        <div className="text-center mb-20">
           <h2 className="font-serif text-4xl md:text-6xl font-bold text-mory-text-primary mb-6">
             你的东西，你做主
           </h2>
@@ -49,25 +42,17 @@ export default function WhyLocalSection() {
             Mory 默认把内容存在你自己的电脑里。<br />
             <span className="font-medium text-mory-text-primary">你的笔记、想法、记录，都只属于你。</span>
           </p>
-        </motion.div>
+        </div>
 
         {/* Reasons Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           {reasons.map((reason, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ 
-                duration: 0.6, 
-                delay: index * 0.15,
-                ease: [0.25, 0.4, 0.25, 1]
-              }}
               className="group relative"
             >
               <div className="flex flex-col sm:flex-row gap-6 p-8 bg-mory-bg rounded-3xl border-2 border-transparent hover:border-mory-orange/20 transition-all duration-300">
-                
+
                 {/* Icon */}
                 <div className="flex-shrink-0 w-16 h-16 rounded-2xl glass-panel bg-white/95 backdrop-blur-md border border-white/80 shadow-sm shadow-gray-200/30 flex items-center justify-center group-hover:bg-orange-50/80 transition-all">
                   <reason.icon size={32} className="text-mory-text-primary group-hover:text-mory-orange transition-colors" />
@@ -83,12 +68,9 @@ export default function WhyLocalSection() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
-
-        {/* Bottom Statement */}
-
 
       </div>
     </section>

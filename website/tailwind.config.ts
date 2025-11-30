@@ -96,6 +96,10 @@ const config: Config = {
           "0%": { backgroundPosition: "0% 50%" },
           "50%": { backgroundPosition: "100% 50%" },
           "100%": { backgroundPosition: "0% 50%" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0", transform: "translateY(-8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
         }
       },
       animation: {
@@ -103,6 +107,7 @@ const config: Config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "float": "float 6s ease-in-out infinite",
         "aurora": "aurora 15s ease infinite",
+        "fade-in": "fade-in 0.3s ease-out forwards",
       },
     },
   },

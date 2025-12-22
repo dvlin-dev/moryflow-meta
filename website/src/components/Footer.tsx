@@ -1,10 +1,8 @@
 import { Mail, Heart } from 'lucide-react';
-import logoSvg from '@/assets/logo.svg';
 
-export default function FooterRedesigned() {
+export default function Footer() {
   return (
     <footer className="relative py-12 sm:py-20 px-4 sm:px-6 overflow-hidden">
-
       {/* Background with gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-mory-bg via-orange-50/30 to-orange-100/40" />
 
@@ -13,19 +11,13 @@ export default function FooterRedesigned() {
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-300/15 rounded-full blur-3xl" />
 
       <div className="container mx-auto max-w-6xl relative z-10">
-
         {/* Main Content Card */}
         <div className="glass-panel bg-white/60 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/40 shadow-xl mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-
             {/* Brand Section */}
             <div className="md:col-span-2 space-y-6">
               <div className="flex items-center gap-3">
-                <img
-                  src={logoSvg}
-                  alt="Moryflow Logo"
-                  className="w-10 h-10 object-contain"
-                />
+                <img src="/logo.svg" alt="Moryflow Logo" className="w-10 h-10 object-contain" />
                 <span className="font-serif font-bold text-2xl text-mory-text-primary">
                   Moryflow
                 </span>
@@ -36,8 +28,10 @@ export default function FooterRedesigned() {
                   Mory，你的智能伙伴
                 </p>
                 <p className="text-base text-mory-text-secondary leading-relaxed max-w-lg">
-                  它会思考、会规划、会不断进化。<br />
-                  帮你准备考试、策划活动、规划旅行...<br />
+                  它会思考、会规划、会不断进化。
+                  <br />
+                  帮你准备考试、策划活动、规划旅行...
+                  <br />
                   <span className="text-mory-orange font-medium">它会和你一起成长。</span>
                 </p>
               </div>
@@ -48,9 +42,7 @@ export default function FooterRedesigned() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mory-orange opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-mory-orange"></span>
                 </span>
-                <span className="text-sm font-medium text-mory-text-primary">
-                  持续进化中
-                </span>
+                <span className="text-sm font-medium text-mory-text-primary">持续进化中</span>
               </div>
             </div>
 
@@ -73,7 +65,6 @@ export default function FooterRedesigned() {
                 </li>
               </ul>
             </div>
-
           </div>
         </div>
 
@@ -83,7 +74,8 @@ export default function FooterRedesigned() {
             <span>© 2025 Moryflow</span>
             <span className="text-gray-300">·</span>
             <span className="flex items-center gap-1">
-              Made with <Heart size={14} className="text-mory-orange fill-mory-orange" /> for everyone
+              Made with <Heart size={14} className="text-mory-orange fill-mory-orange" /> for
+              everyone
             </span>
           </div>
 
@@ -93,7 +85,6 @@ export default function FooterRedesigned() {
             </span>
           </div>
         </div>
-
       </div>
     </footer>
   );

@@ -1,46 +1,40 @@
-import { useState } from 'react'
-import { Download, Apple, Monitor, Loader2, CheckCircle2 } from 'lucide-react'
-import { useDownload } from '../../hooks/useDownloadMirror'
+import { useState } from 'react';
+import { Download, Apple, Monitor, Loader2, CheckCircle2 } from 'lucide-react';
+import { useDownload } from '../hooks/useDownload';
 
-type Platform = 'mac' | 'win'
-type DownloadState = 'idle' | 'preparing' | 'downloading'
+type Platform = 'mac' | 'win';
+type DownloadState = 'idle' | 'preparing' | 'downloading';
 
 export default function DownloadCTA() {
-  const { version, isLoading, getDownloadInfo, startDownload } = useDownload()
+  const { version, isLoading, getDownloadInfo, startDownload } = useDownload();
   const [downloadStates, setDownloadStates] = useState<Record<Platform, DownloadState>>({
     mac: 'idle',
     win: 'idle',
-  })
+  });
 
   const handleDownload = async (platform: Platform) => {
-    // 检查是否有下载信息
-    const info = getDownloadInfo(platform)
-    if (!info) return
+    const info = getDownloadInfo(platform);
+    if (!info) return;
 
-    // 设置准备中状态
-    setDownloadStates(prev => ({ ...prev, [platform]: 'preparing' }))
+    setDownloadStates((prev) => ({ ...prev, [platform]: 'preparing' }));
 
-    // 短暂延迟让用户看到 loading 状态
-    await new Promise(resolve => setTimeout(resolve, 300))
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
-    // 开始下载
-    const success = await startDownload(platform)
+    const success = await startDownload(platform);
 
     if (success) {
-      // 设置下载中状态
-      setDownloadStates(prev => ({ ...prev, [platform]: 'downloading' }))
+      setDownloadStates((prev) => ({ ...prev, [platform]: 'downloading' }));
 
-      // 3 秒后恢复 idle 状态
       setTimeout(() => {
-        setDownloadStates(prev => ({ ...prev, [platform]: 'idle' }))
-      }, 3000)
+        setDownloadStates((prev) => ({ ...prev, [platform]: 'idle' }));
+      }, 3000);
     } else {
-      setDownloadStates(prev => ({ ...prev, [platform]: 'idle' }))
+      setDownloadStates((prev) => ({ ...prev, [platform]: 'idle' }));
     }
-  }
+  };
 
   const renderButtonContent = (platform: Platform, label: string) => {
-    const state = downloadStates[platform]
+    const state = downloadStates[platform];
 
     if (isLoading) {
       return (
@@ -48,7 +42,7 @@ export default function DownloadCTA() {
           <Loader2 size={20} className="animate-spin" />
           加载中...
         </>
-      )
+      );
     }
 
     switch (state) {
@@ -58,27 +52,27 @@ export default function DownloadCTA() {
             <Loader2 size={20} className="animate-spin" />
             准备下载...
           </>
-        )
+        );
       case 'downloading':
         return (
           <>
             <CheckCircle2 size={20} className="text-green-400" />
             下载已开始
           </>
-        )
+        );
       default:
         return (
           <>
             <Download size={20} />
             {label}
           </>
-        )
+        );
     }
-  }
+  };
 
   const isButtonDisabled = (platform: Platform) => {
-    return isLoading || downloadStates[platform] !== 'idle' || !getDownloadInfo(platform)
-  }
+    return isLoading || downloadStates[platform] !== 'idle' || !getDownloadInfo(platform);
+  };
 
   return (
     <section
@@ -148,10 +142,8 @@ export default function DownloadCTA() {
         </div>
 
         {/* 版本信息 */}
-        <div className="text-sm text-mory-text-muted">
-          {version ? `v${version}` : 'Beta'}
-        </div>
+        <div className="text-sm text-mory-text-muted">{version ? `v${version}` : 'Beta'}</div>
       </div>
     </section>
-  )
+  );
 }

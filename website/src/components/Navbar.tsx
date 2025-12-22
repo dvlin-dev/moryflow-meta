@@ -1,26 +1,24 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Download, BookOpen } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import logoSvg from '@/assets/logo.svg'
+import { useState, useEffect } from 'react';
+import { Download, BookOpen } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const scrollToDownload = () => {
-    const downloadSection = document.getElementById('download')
+    const downloadSection = document.getElementById('download');
     if (downloadSection) {
-      downloadSection.scrollIntoView({ behavior: 'smooth' })
+      downloadSection.scrollIntoView({ behavior: 'smooth' });
     }
-  }
+  };
 
   return (
     <nav
@@ -36,16 +34,16 @@ export default function Navbar() {
         )}
       >
         {/* Brand */}
-        <Link to="/" className="flex items-center gap-2 group">
+        <a href="/" className="flex items-center gap-2 group">
           <img
-            src={logoSvg}
+            src="/logo.svg"
             alt="Moryflow Logo"
             className="w-7 h-7 object-contain transition-transform group-hover:scale-110"
           />
           <span className="font-serif font-bold text-xl tracking-tight text-mory-text-primary group-hover:text-mory-orange transition-colors">
             Moryflow
           </span>
-        </Link>
+        </a>
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-4">
@@ -69,5 +67,5 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
-  )
+  );
 }

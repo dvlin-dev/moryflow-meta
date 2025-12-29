@@ -13,18 +13,12 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { RelationService } from './relation.service';
+import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
+import {
+  CreateRelationRequestSchema,
+  type CreateRelationRequest,
+} from './dto';
 import type { CreateRelationInput, Relation } from '@moryflow/memory-core';
-
-class CreateRelationDto {
-  sourceId!: string;
-  targetId!: string;
-  type!: string;
-  properties?: Record<string, unknown>;
-  userId!: string;
-  confidence?: number;
-  validFrom?: string;
-  validTo?: string;
-}
 
 @ApiTags('relations')
 @Controller('relations')
@@ -35,7 +29,11 @@ export class RelationController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new relation' })
   @ApiResponse({ status: 201, description: 'Relation created successfully' })
-  async create(@Body() dto: CreateRelationDto): Promise<Relation> {
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  async create(
+    @Body(new ZodValidationPipe(CreateRelationRequestSchema))
+    dto: CreateRelationRequest,
+  ): Promise<Relation> {
     const input: CreateRelationInput = {
       sourceId: dto.sourceId,
       targetId: dto.targetId,
@@ -59,6 +57,8 @@ export class RelationController {
   @Get(':id')
   @ApiOperation({ summary: 'Get relation by ID' })
   @ApiQuery({ name: 'userId', required: true })
+  @ApiResponse({ status: 200, description: 'Relation found' })
+  @ApiResponse({ status: 404, description: 'Relation not found' })
   async getById(
     @Param('id') id: string,
     @Query('userId') userId: string,
@@ -88,6 +88,7 @@ export class RelationController {
   @ApiQuery({ name: 'type', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'offset', required: false })
+  @ApiResponse({ status: 200, description: 'List of relations' })
   async list(
     @Query('userId') userId: string,
     @Query('entityId') entityId?: string,
@@ -130,6 +131,8 @@ export class RelationController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a relation' })
   @ApiQuery({ name: 'userId', required: true })
+  @ApiResponse({ status: 204, description: 'Relation deleted' })
+  @ApiResponse({ status: 404, description: 'Relation not found' })
   async delete(
     @Param('id') id: string,
     @Query('userId') userId: string,

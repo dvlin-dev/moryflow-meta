@@ -14,31 +14,16 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { EntityService } from './entity.service';
+import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
+import {
+  CreateEntityRequestSchema,
+  UpdateEntityRequestSchema,
+  SearchEntityRequestSchema,
+  type CreateEntityRequest,
+  type UpdateEntityRequest,
+  type SearchEntityRequest,
+} from './dto';
 import type { CreateEntityInput, UpdateEntityInput, Entity } from '@moryflow/memory-core';
-
-class CreateEntityDto {
-  type!: 'person' | 'organization' | 'location' | 'concept' | 'event' | 'custom';
-  name!: string;
-  properties?: Record<string, unknown>;
-  userId!: string;
-  source?: string;
-  confidence?: number;
-}
-
-class UpdateEntityDto {
-  type?: 'person' | 'organization' | 'location' | 'concept' | 'event' | 'custom';
-  name?: string;
-  properties?: Record<string, unknown>;
-  confidence?: number;
-}
-
-class SearchEntityDto {
-  query!: string;
-  userId!: string;
-  type?: string;
-  limit?: number;
-  threshold?: number;
-}
 
 @ApiTags('entities')
 @Controller('entities')
@@ -49,7 +34,11 @@ export class EntityController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new entity' })
   @ApiResponse({ status: 201, description: 'Entity created successfully' })
-  async create(@Body() dto: CreateEntityDto): Promise<Entity> {
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  async create(
+    @Body(new ZodValidationPipe(CreateEntityRequestSchema))
+    dto: CreateEntityRequest,
+  ): Promise<Entity> {
     const input: CreateEntityInput = {
       type: dto.type,
       name: dto.name,
@@ -71,7 +60,12 @@ export class EntityController {
   @Post('search')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Search entities by semantic similarity' })
-  async search(@Body() dto: SearchEntityDto): Promise<Array<Entity & { score: number }>> {
+  @ApiResponse({ status: 200, description: 'Search results' })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  async search(
+    @Body(new ZodValidationPipe(SearchEntityRequestSchema))
+    dto: SearchEntityRequest,
+  ): Promise<Array<Entity & { score: number }>> {
     const result = await this.entityService.search(dto.userId, dto.query, {
       type: dto.type,
       limit: dto.limit,
@@ -88,6 +82,8 @@ export class EntityController {
   @Get(':id')
   @ApiOperation({ summary: 'Get entity by ID' })
   @ApiQuery({ name: 'userId', required: true })
+  @ApiResponse({ status: 200, description: 'Entity found' })
+  @ApiResponse({ status: 404, description: 'Entity not found' })
   async getById(
     @Param('id') id: string,
     @Query('userId') userId: string,
@@ -115,6 +111,7 @@ export class EntityController {
   @ApiQuery({ name: 'type', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'offset', required: false })
+  @ApiResponse({ status: 200, description: 'List of entities' })
   async list(
     @Query('userId') userId: string,
     @Query('type') type?: string,
@@ -141,10 +138,13 @@ export class EntityController {
   @Put(':id')
   @ApiOperation({ summary: 'Update an entity' })
   @ApiQuery({ name: 'userId', required: true })
+  @ApiResponse({ status: 200, description: 'Entity updated' })
+  @ApiResponse({ status: 404, description: 'Entity not found' })
   async update(
     @Param('id') id: string,
     @Query('userId') userId: string,
-    @Body() dto: UpdateEntityDto,
+    @Body(new ZodValidationPipe(UpdateEntityRequestSchema))
+    dto: UpdateEntityRequest,
   ): Promise<Entity> {
     if (!userId) {
       throw new BadRequestException('userId is required');
@@ -173,6 +173,8 @@ export class EntityController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an entity' })
   @ApiQuery({ name: 'userId', required: true })
+  @ApiResponse({ status: 204, description: 'Entity deleted' })
+  @ApiResponse({ status: 404, description: 'Entity not found' })
   async delete(
     @Param('id') id: string,
     @Query('userId') userId: string,

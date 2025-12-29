@@ -13,40 +13,16 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { MemoryService } from './memory.service';
-import type { AddMemoryInput, SearchOptions, MemoryItem, SearchResult } from '@moryflow/memory-core';
-
-// ============ DTOs ============
-
-class AddMemoryDto {
-  content!: string;
-  metadata!: {
-    userId: string;
-    agentId?: string;
-    sessionId?: string;
-    source?: 'conversation' | 'document' | 'extraction';
-    importance?: number;
-    tags?: string[];
-  };
-  extractEntities?: boolean;
-  extractRelations?: boolean;
-}
-
-class SearchMemoryDto {
-  query!: string;
-  userId!: string;
-  limit?: number;
-  threshold?: number;
-  includeGraph?: boolean;
-  graphDepth?: number;
-  filter?: {
-    agentId?: string;
-    sessionId?: string;
-    source?: string;
-    tags?: string[];
-  };
-}
-
-// ============ Controller ============
+import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
+import {
+  AddMemoryRequestSchema,
+  SearchMemoryRequestSchema,
+  type AddMemoryRequest,
+  type SearchMemoryRequest,
+  type MemoryItemResponse,
+  type SearchResultResponse,
+} from './dto';
+import type { AddMemoryInput, SearchOptions } from '@moryflow/memory-core';
 
 @ApiTags('memories')
 @Controller('memories')
@@ -58,7 +34,10 @@ export class MemoryController {
   @ApiOperation({ summary: 'Add a new memory' })
   @ApiResponse({ status: 201, description: 'Memory created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
-  async add(@Body() dto: AddMemoryDto): Promise<MemoryItem> {
+  async add(
+    @Body(new ZodValidationPipe(AddMemoryRequestSchema))
+    dto: AddMemoryRequest,
+  ): Promise<MemoryItemResponse> {
     const input: AddMemoryInput = {
       content: dto.content,
       metadata: {
@@ -79,7 +58,7 @@ export class MemoryController {
       throw new BadRequestException(result.error.message);
     }
 
-    return result.value;
+    return this.toResponse(result.value);
   }
 
   @Post('search')
@@ -87,7 +66,10 @@ export class MemoryController {
   @ApiOperation({ summary: 'Search memories by semantic similarity' })
   @ApiResponse({ status: 200, description: 'Search results' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
-  async search(@Body() dto: SearchMemoryDto): Promise<SearchResult> {
+  async search(
+    @Body(new ZodValidationPipe(SearchMemoryRequestSchema))
+    dto: SearchMemoryRequest,
+  ): Promise<SearchResultResponse> {
     const options: SearchOptions = {
       userId: dto.userId,
       limit: dto.limit ?? 10,
@@ -103,7 +85,14 @@ export class MemoryController {
       throw new BadRequestException(result.error.message);
     }
 
-    return result.value;
+    return {
+      items: result.value.items.map((item) => ({
+        ...this.toResponse(item),
+        score: item.score,
+        source: item.source,
+      })),
+      took: result.value.took,
+    };
   }
 
   @Get(':id')
@@ -114,7 +103,7 @@ export class MemoryController {
   async getById(
     @Param('id') id: string,
     @Query('userId') userId: string,
-  ): Promise<MemoryItem> {
+  ): Promise<MemoryItemResponse> {
     if (!userId) {
       throw new BadRequestException('userId is required');
     }
@@ -129,7 +118,7 @@ export class MemoryController {
       throw new NotFoundException('Memory not found');
     }
 
-    return result.value;
+    return this.toResponse(result.value);
   }
 
   @Get()
@@ -144,7 +133,7 @@ export class MemoryController {
     @Query('agentId') agentId?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
-  ): Promise<MemoryItem[]> {
+  ): Promise<MemoryItemResponse[]> {
     if (!userId) {
       throw new BadRequestException('userId is required');
     }
@@ -159,7 +148,7 @@ export class MemoryController {
       throw new BadRequestException(result.error.message);
     }
 
-    return result.value;
+    return result.value.map((item) => this.toResponse(item));
   }
 
   @Delete(':id')
@@ -185,5 +174,35 @@ export class MemoryController {
     if (!result.value) {
       throw new NotFoundException('Memory not found');
     }
+  }
+
+  private toResponse(item: {
+    id: string;
+    content: string;
+    metadata: {
+      userId: string;
+      agentId?: string;
+      sessionId?: string;
+      source?: string;
+      importance?: number;
+      tags?: string[];
+    };
+    createdAt: Date;
+    updatedAt: Date;
+  }): MemoryItemResponse {
+    return {
+      id: item.id,
+      content: item.content,
+      metadata: {
+        userId: item.metadata.userId,
+        agentId: item.metadata.agentId,
+        sessionId: item.metadata.sessionId,
+        source: (item.metadata.source as 'conversation' | 'document' | 'extraction') ?? 'conversation',
+        importance: item.metadata.importance,
+        tags: item.metadata.tags,
+      },
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
+    };
   }
 }

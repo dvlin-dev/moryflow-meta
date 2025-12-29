@@ -12,10 +12,7 @@ export function registerEntityTools(server: McpServer, client: MemoryApiClient) 
         .enum(['person', 'organization', 'location', 'concept', 'event', 'custom'])
         .describe('Type of entity'),
       name: z.string().describe('Name of the entity'),
-      properties: z
-        .record(z.string(), z.unknown())
-        .optional()
-        .describe('Additional properties'),
+      properties: z.record(z.string(), z.unknown()).optional().describe('Additional properties'),
     },
     async ({ type, name, properties }) => {
       const result = await client.createEntity({ type, name, properties });
@@ -102,9 +99,7 @@ export function registerEntityTools(server: McpServer, client: MemoryApiClient) 
         };
       }
 
-      const entities = data
-        .map((e, i) => `${i + 1}. [${e.type}] ${e.name}`)
-        .join('\n');
+      const entities = data.map((e, i) => `${i + 1}. [${e.type}] ${e.name}`).join('\n');
 
       return {
         content: [{ type: 'text', text: `Entities:\n\n${entities}` }],
@@ -120,10 +115,7 @@ export function registerEntityTools(server: McpServer, client: MemoryApiClient) 
       sourceId: z.string().describe('ID of the source entity'),
       targetId: z.string().describe('ID of the target entity'),
       type: z.string().describe('Type of relationship (e.g., works_at, knows, part_of)'),
-      properties: z
-        .record(z.string(), z.unknown())
-        .optional()
-        .describe('Additional properties'),
+      properties: z.record(z.string(), z.unknown()).optional().describe('Additional properties'),
     },
     async ({ sourceId, targetId, type, properties }) => {
       const result = await client.createRelation({ sourceId, targetId, type, properties });
@@ -136,9 +128,7 @@ export function registerEntityTools(server: McpServer, client: MemoryApiClient) 
       }
 
       return {
-        content: [
-          { type: 'text', text: `Relation "${type}" created. ID: ${result.data?.id}` },
-        ],
+        content: [{ type: 'text', text: `Relation "${type}" created. ID: ${result.data?.id}` }],
       };
     },
   );
@@ -169,7 +159,10 @@ export function registerEntityTools(server: McpServer, client: MemoryApiClient) 
       }
 
       const relations = data
-        .map((r, i) => `${i + 1}. ${r.sourceId.slice(0, 8)} --[${r.type}]--> ${r.targetId.slice(0, 8)}`)
+        .map(
+          (r, i) =>
+            `${i + 1}. ${r.sourceId.slice(0, 8)} --[${r.type}]--> ${r.targetId.slice(0, 8)}`,
+        )
         .join('\n');
 
       return {

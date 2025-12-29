@@ -1,23 +1,4 @@
-import type {
-  MemorySource,
-  MemoryMetadata,
-  MemoryItem,
-  ScoredMemoryItem,
-  Entity,
-  Relation,
-  SubGraph,
-} from './schemas/index';
-
-// Re-export schema types
-export type {
-  MemorySource,
-  MemoryMetadata,
-  MemoryItem,
-  ScoredMemoryItem,
-  Entity,
-  Relation,
-  SubGraph,
-};
+import type { ScoredMemoryItem, SubGraph, Entity } from './schemas/index';
 
 // ============ Search Result Types ============
 
@@ -77,27 +58,4 @@ export interface TraversalNode {
 export interface TraversalResult {
   nodes: TraversalNode[];
   subGraph: SubGraph;
-}
-
-// ============ Config Types ============
-
-export interface EmbeddingConfig {
-  provider: 'aliyun' | 'openai' | 'custom';
-  apiKey: string;
-  baseUrl?: string;
-  model?: string;
-  dimension?: number;
-}
-
-export interface LLMConfig {
-  provider: 'openai' | 'anthropic' | 'custom';
-  apiKey: string;
-  baseUrl?: string;
-  model?: string;
-}
-
-export interface MemoryConfig {
-  embedding: EmbeddingConfig;
-  llm?: LLMConfig;
-  vectorIndexType?: 'hnsw' | 'ivfflat';
 }

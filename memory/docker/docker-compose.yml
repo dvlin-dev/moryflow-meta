@@ -1,8 +1,6 @@
 services:
   memory-db:
-    build:
-      context: .
-      dockerfile: Dockerfile.postgres
+    image: pgvector/pgvector:pg17
     container_name: memory-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-memory}
@@ -27,12 +25,12 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-memory}:${POSTGRES_PASSWORD:-memory_secret}@memory-db:5432/${POSTGRES_DB:-memory}
       EMBEDDING_API_KEY: ${EMBEDDING_API_KEY}
-      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-v4}
       LLM_PROVIDER: ${LLM_PROVIDER:-openai}
       LLM_API_KEY: ${LLM_API_KEY}
-      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
-      LLM_MODEL: ${LLM_MODEL:-gpt-4.1-mini}
+      LLM_BASE_URL: ${LLM_BASE_URL}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
       PORT: 3000
       NODE_ENV: production
     ports:

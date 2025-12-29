@@ -41,3 +41,19 @@ export {
   type Relation,
   type SubGraph,
 } from './graph.schema';
+
+// Config Schemas
+export {
+  EmbeddingProviderSchema,
+  EmbeddingConfigSchema,
+  LLMProviderSchema,
+  LLMConfigSchema,
+  VectorIndexTypeSchema,
+  MemoryConfigSchema,
+  type EmbeddingProvider,
+  type EmbeddingConfig,
+  type LLMProvider,
+  type LLMConfig,
+  type VectorIndexType,
+  type MemoryConfig,
+} from './config.schema';

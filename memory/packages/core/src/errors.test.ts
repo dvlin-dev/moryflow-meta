@@ -9,6 +9,8 @@ import {
   unwrap,
   unwrapOr,
   mapResult,
+  mapError,
+  flatMapResultSync,
 } from './errors';
 
 describe('Result type', () => {
@@ -153,6 +155,61 @@ describe('mapResult', () => {
     expect(mapped.ok).toBe(false);
     if (!mapped.ok) {
       expect(mapped.error.code).toBe(MemoryErrorCode.NOT_FOUND);
+    }
+  });
+});
+
+describe('mapError', () => {
+  it('should pass through Ok', () => {
+    const result = Ok(42);
+    const mapped = mapError(result, (e) => ({ ...e, code: MemoryErrorCode.UNKNOWN }));
+    expect(mapped.ok).toBe(true);
+    if (mapped.ok) {
+      expect(mapped.value).toBe(42);
+    }
+  });
+
+  it('should map Err values', () => {
+    const error = createError(MemoryErrorCode.NOT_FOUND, 'Not found');
+    const result = Err(error);
+    const mapped = mapError(result, (e) => ({
+      ...e,
+      message: `Wrapped: ${e.message}`,
+    }));
+    expect(mapped.ok).toBe(false);
+    if (!mapped.ok) {
+      expect(mapped.error.message).toBe('Wrapped: Not found');
+    }
+  });
+});
+
+describe('flatMapResultSync', () => {
+  it('should chain Ok results', () => {
+    const result = Ok(21);
+    const chained = flatMapResultSync(result, (x) => Ok(x * 2));
+    expect(chained.ok).toBe(true);
+    if (chained.ok) {
+      expect(chained.value).toBe(42);
+    }
+  });
+
+  it('should short-circuit on first Err', () => {
+    const error = createError(MemoryErrorCode.NOT_FOUND, 'Not found');
+    const result = Err(error);
+    const chained = flatMapResultSync(result, (x: number) => Ok(x * 2));
+    expect(chained.ok).toBe(false);
+    if (!chained.ok) {
+      expect(chained.error.code).toBe(MemoryErrorCode.NOT_FOUND);
+    }
+  });
+
+  it('should propagate Err from chained function', () => {
+    const result = Ok(42);
+    const error = createError(MemoryErrorCode.VALIDATION_ERROR, 'Invalid');
+    const chained = flatMapResultSync(result, () => Err(error));
+    expect(chained.ok).toBe(false);
+    if (!chained.ok) {
+      expect(chained.error.code).toBe(MemoryErrorCode.VALIDATION_ERROR);
     }
   });
 });

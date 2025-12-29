@@ -156,7 +156,7 @@ export function mapResult<T, U>(result: Result<T>, fn: (value: T) => U): Result<
 }
 
 /**
- * Chain multiple Result operations
+ * Chain multiple Result operations (async)
  */
 export async function flatMapResult<T, U>(
   result: Result<T>,
@@ -166,4 +166,30 @@ export async function flatMapResult<T, U>(
     return fn(result.value);
   }
   return result;
+}
+
+/**
+ * Chain multiple Result operations (sync)
+ */
+export function flatMapResultSync<T, U>(
+  result: Result<T>,
+  fn: (value: T) => Result<U>,
+): Result<U> {
+  if (result.ok) {
+    return fn(result.value);
+  }
+  return result;
+}
+
+/**
+ * Map an error result to a new error
+ */
+export function mapError<T, E1, E2>(
+  result: Result<T, E1>,
+  fn: (error: E1) => E2,
+): Result<T, E2> {
+  if (result.ok) {
+    return result;
+  }
+  return Err(fn(result.error));
 }

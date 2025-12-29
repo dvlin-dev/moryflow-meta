@@ -18,5 +18,7 @@ export {
   unwrap,
   unwrapOr,
   mapResult,
+  mapError,
   flatMapResult,
+  flatMapResultSync,
 } from './errors';

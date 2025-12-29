@@ -26,7 +26,8 @@ COPY memory/packages/server ./memory/packages/server
 
 # Build core first, then server
 RUN pnpm --filter @moryflow/memory-core build
-RUN pnpm --filter @moryflow/memory-server db:generate
+# Set dummy DATABASE_URL for prisma generate (not actually connecting)
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" pnpm --filter @moryflow/memory-server db:generate
 RUN pnpm --filter @moryflow/memory-server build
 
 # Production stage

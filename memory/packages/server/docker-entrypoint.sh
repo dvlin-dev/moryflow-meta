@@ -2,7 +2,7 @@
 set -e
 
 echo "Running database migrations..."
-cd /app/packages/server
+cd /app/memory/packages/server
 npx prisma migrate deploy
 
 echo "Starting server..."

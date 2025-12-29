@@ -47,9 +47,6 @@ COPY memory/packages/server/package.json ./memory/packages/server/
 # Install production dependencies only
 RUN pnpm install --prod --frozen-lockfile
 
-# Install prisma CLI globally for migrations
-RUN npm install -g prisma
-
 # Copy built artifacts
 COPY --from=builder /app/memory/packages/core/dist ./memory/packages/core/dist
 COPY --from=builder /app/memory/packages/server/dist ./memory/packages/server/dist

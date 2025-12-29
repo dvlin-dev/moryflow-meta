@@ -1,3 +1,11 @@
+/**
+ * Main entry point - React app bootstrap
+ *
+ * [PROVIDES]: React app initialization with QueryClient and Router
+ * [DEPENDS]: App, react-query, react-router-dom
+ * [POS]: Entry point, mounts React app to #root
+ */
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

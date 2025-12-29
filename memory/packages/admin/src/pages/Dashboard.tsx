@@ -1,22 +1,28 @@
+/**
+ * Dashboard page - Overview and stats
+ *
+ * [PROPS]: none (route component)
+ * [EMITS]: none
+ * [POS]: Landing page showing memory/entity/relation counts and recent items
+ */
+
 import { useQuery } from '@tanstack/react-query';
 import { Brain, Network, GitBranch, Activity } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { memoryApi, entityApi, relationApi } from '../api/client';
 
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-}: {
+interface StatCardProps {
   title: string;
   value: number | string;
-  icon: React.ElementType;
+  icon: ReactNode;
   color: string;
-}) {
+}
+
+function StatCard({ title, value, icon, color }: StatCardProps) {
   return (
     <div className="card flex items-center gap-4">
       <div className={`p-3 rounded-lg ${color}`}>
-        <Icon className="w-6 h-6 text-white" />
+        {icon}
       </div>
       <div>
         <p className="text-sm text-gray-500">{title}</p>
@@ -42,29 +48,29 @@ export default function Dashboard() {
     queryFn: () => relationApi.list(),
   });
 
-  const stats = [
+  const stats: StatCardProps[] = [
     {
       title: 'Total Memories',
       value: memories?.length ?? 0,
-      icon: Brain,
+      icon: <Brain className="w-6 h-6 text-white" />,
       color: 'bg-blue-500',
     },
     {
       title: 'Total Entities',
       value: entities?.length ?? 0,
-      icon: Network,
+      icon: <Network className="w-6 h-6 text-white" />,
       color: 'bg-green-500',
     },
     {
       title: 'Total Relations',
       value: relations?.length ?? 0,
-      icon: GitBranch,
+      icon: <GitBranch className="w-6 h-6 text-white" />,
       color: 'bg-purple-500',
     },
     {
       title: 'Status',
       value: 'Active',
-      icon: Activity,
+      icon: <Activity className="w-6 h-6 text-white" />,
       color: 'bg-emerald-500',
     },
   ];

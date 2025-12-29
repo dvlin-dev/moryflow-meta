@@ -1,7 +1,16 @@
+/**
+ * Relations page - CRUD for entity relationships
+ *
+ * [PROPS]: none (route component)
+ * [EMITS]: none
+ * [POS]: Main page for viewing, adding, and deleting relations between entities
+ */
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, X, ArrowRight } from 'lucide-react';
+import { Plus, Trash2, ArrowRight } from 'lucide-react';
 import { relationApi, entityApi, type Relation, type Entity } from '../api/client';
+import Modal from '../components/Modal';
 
 export default function Relations() {
   const queryClient = useQueryClient();
@@ -42,6 +51,11 @@ export default function Relations() {
   const getEntityName = (id: string) => {
     const entity = entities?.find((e) => e.id === id);
     return entity?.name ?? id.slice(0, 8);
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setNewRelation({ sourceId: '', targetId: '', type: '' });
   };
 
   return (
@@ -97,95 +111,83 @@ export default function Relations() {
       </div>
 
       {/* Add Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Add Relation</h2>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      <Modal
+        isOpen={showAddModal}
+        onClose={handleCloseModal}
+        title="Add Relation"
+        footer={
+          <>
+            <button onClick={handleCloseModal} className="btn btn-secondary">
+              Cancel
+            </button>
+            <button
+              onClick={() => createMutation.mutate(newRelation)}
+              disabled={
+                !newRelation.sourceId ||
+                !newRelation.targetId ||
+                !newRelation.type.trim() ||
+                createMutation.isPending
+              }
+              className="btn btn-primary"
+            >
+              {createMutation.isPending ? 'Creating...' : 'Create Relation'}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="label">Source Entity</label>
+            <select
+              value={newRelation.sourceId}
+              onChange={(e) =>
+                setNewRelation({ ...newRelation, sourceId: e.target.value })
+              }
+              className="input"
+            >
+              <option value="">Select entity...</option>
+              {entities?.map((entity: Entity) => (
+                <option key={entity.id} value={entity.id}>
+                  {entity.name} ({entity.type})
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="label">Source Entity</label>
-                <select
-                  value={newRelation.sourceId}
-                  onChange={(e) =>
-                    setNewRelation({ ...newRelation, sourceId: e.target.value })
-                  }
-                  className="input"
-                >
-                  <option value="">Select entity...</option>
-                  {entities?.map((entity: Entity) => (
-                    <option key={entity.id} value={entity.id}>
-                      {entity.name} ({entity.type})
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div>
+            <label className="label">Relation Type</label>
+            <input
+              type="text"
+              value={newRelation.type}
+              onChange={(e) =>
+                setNewRelation({ ...newRelation, type: e.target.value })
+              }
+              placeholder="e.g., works_at, knows, part_of"
+              className="input"
+            />
+          </div>
 
-              <div>
-                <label className="label">Relation Type</label>
-                <input
-                  type="text"
-                  value={newRelation.type}
-                  onChange={(e) =>
-                    setNewRelation({ ...newRelation, type: e.target.value })
-                  }
-                  placeholder="e.g., works_at, knows, part_of"
-                  className="input"
-                />
-              </div>
-
-              <div>
-                <label className="label">Target Entity</label>
-                <select
-                  value={newRelation.targetId}
-                  onChange={(e) =>
-                    setNewRelation({ ...newRelation, targetId: e.target.value })
-                  }
-                  className="input"
-                >
-                  <option value="">Select entity...</option>
-                  {entities
-                    ?.filter((e: Entity) => e.id !== newRelation.sourceId)
-                    .map((entity: Entity) => (
-                      <option key={entity.id} value={entity.id}>
-                        {entity.name} ({entity.type})
-                      </option>
-                    ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="btn btn-secondary"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => createMutation.mutate(newRelation)}
-                disabled={
-                  !newRelation.sourceId ||
-                  !newRelation.targetId ||
-                  !newRelation.type.trim() ||
-                  createMutation.isPending
-                }
-                className="btn btn-primary"
-              >
-                {createMutation.isPending ? 'Creating...' : 'Create Relation'}
-              </button>
-            </div>
+          <div>
+            <label className="label">Target Entity</label>
+            <select
+              value={newRelation.targetId}
+              onChange={(e) =>
+                setNewRelation({ ...newRelation, targetId: e.target.value })
+              }
+              className="input"
+            >
+              <option value="">Select entity...</option>
+              {entities
+                ?.filter((e: Entity) => e.id !== newRelation.sourceId)
+                .map((entity: Entity) => (
+                  <option key={entity.id} value={entity.id}>
+                    {entity.name} ({entity.type})
+                  </option>
+                ))}
+            </select>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

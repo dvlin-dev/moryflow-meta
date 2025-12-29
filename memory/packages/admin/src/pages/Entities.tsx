@@ -1,16 +1,17 @@
+/**
+ * Entities page - CRUD for knowledge graph entities
+ *
+ * [PROPS]: none (route component)
+ * [EMITS]: none
+ * [POS]: Main page for viewing, searching, adding, and deleting entities
+ */
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, X, Search } from 'lucide-react';
+import { Plus, Trash2, Search } from 'lucide-react';
 import { entityApi, type Entity } from '../api/client';
-
-const ENTITY_TYPES = [
-  'person',
-  'organization',
-  'location',
-  'concept',
-  'event',
-  'custom',
-];
+import { ENTITY_TYPES } from '../constants';
+import Modal from '../components/Modal';
 
 export default function Entities() {
   const queryClient = useQueryClient();
@@ -48,6 +49,11 @@ export default function Entities() {
   });
 
   const displayEntities = isSearching && searchResults ? searchResults : entities;
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setNewEntity({ type: 'person', name: '' });
+  };
 
   return (
     <div>
@@ -147,69 +153,53 @@ export default function Entities() {
       </div>
 
       {/* Add Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Add Entity</h2>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      <Modal
+        isOpen={showAddModal}
+        onClose={handleCloseModal}
+        title="Add Entity"
+        footer={
+          <>
+            <button onClick={handleCloseModal} className="btn btn-secondary">
+              Cancel
+            </button>
+            <button
+              onClick={() => createMutation.mutate(newEntity)}
+              disabled={!newEntity.name.trim() || createMutation.isPending}
+              className="btn btn-primary"
+            >
+              {createMutation.isPending ? 'Creating...' : 'Create Entity'}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="label">Type</label>
+            <select
+              value={newEntity.type}
+              onChange={(e) => setNewEntity({ ...newEntity, type: e.target.value })}
+              className="input"
+            >
+              {ENTITY_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="label">Type</label>
-                <select
-                  value={newEntity.type}
-                  onChange={(e) =>
-                    setNewEntity({ ...newEntity, type: e.target.value })
-                  }
-                  className="input"
-                >
-                  {ENTITY_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="label">Name</label>
-                <input
-                  type="text"
-                  value={newEntity.name}
-                  onChange={(e) =>
-                    setNewEntity({ ...newEntity, name: e.target.value })
-                  }
-                  placeholder="Entity name..."
-                  className="input"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="btn btn-secondary"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => createMutation.mutate(newEntity)}
-                disabled={!newEntity.name.trim() || createMutation.isPending}
-                className="btn btn-primary"
-              >
-                {createMutation.isPending ? 'Creating...' : 'Create Entity'}
-              </button>
-            </div>
+          <div>
+            <label className="label">Name</label>
+            <input
+              type="text"
+              value={newEntity.name}
+              onChange={(e) => setNewEntity({ ...newEntity, name: e.target.value })}
+              placeholder="Entity name..."
+              className="input"
+            />
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

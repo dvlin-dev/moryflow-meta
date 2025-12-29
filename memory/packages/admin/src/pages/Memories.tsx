@@ -1,7 +1,16 @@
+/**
+ * Memories page - CRUD for memory items
+ *
+ * [PROPS]: none (route component)
+ * [EMITS]: none
+ * [POS]: Main page for viewing, searching, adding, and deleting memories
+ */
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Plus, Trash2, X } from 'lucide-react';
+import { Search, Plus, Trash2 } from 'lucide-react';
 import { memoryApi, type Memory } from '../api/client';
+import Modal from '../components/Modal';
 
 export default function Memories() {
   const queryClient = useQueryClient();
@@ -38,6 +47,11 @@ export default function Memories() {
   });
 
   const displayMemories = isSearching && searchResults ? searchResults.items : memories;
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setNewContent('');
+  };
 
   return (
     <div>
@@ -141,42 +155,33 @@ export default function Memories() {
       </div>
 
       {/* Add Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Add Memory</h2>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <textarea
-              value={newContent}
-              onChange={(e) => setNewContent(e.target.value)}
-              placeholder="Enter memory content..."
-              className="input min-h-[120px] resize-none"
-            />
-            <div className="flex justify-end gap-3 mt-4">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="btn btn-secondary"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => createMutation.mutate(newContent)}
-                disabled={!newContent.trim() || createMutation.isPending}
-                className="btn btn-primary"
-              >
-                {createMutation.isPending ? 'Adding...' : 'Add Memory'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={showAddModal}
+        onClose={handleCloseModal}
+        title="Add Memory"
+        maxWidth="lg"
+        footer={
+          <>
+            <button onClick={handleCloseModal} className="btn btn-secondary">
+              Cancel
+            </button>
+            <button
+              onClick={() => createMutation.mutate(newContent)}
+              disabled={!newContent.trim() || createMutation.isPending}
+              className="btn btn-primary"
+            >
+              {createMutation.isPending ? 'Adding...' : 'Add Memory'}
+            </button>
+          </>
+        }
+      >
+        <textarea
+          value={newContent}
+          onChange={(e) => setNewContent(e.target.value)}
+          placeholder="Enter memory content..."
+          className="input min-h-[120px] resize-none"
+        />
+      </Modal>
     </div>
   );
 }

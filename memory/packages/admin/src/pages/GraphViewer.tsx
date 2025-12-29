@@ -1,7 +1,16 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+/**
+ * Graph Viewer page - Interactive knowledge graph visualization
+ *
+ * [PROPS]: none (route component)
+ * [EMITS]: none
+ * [POS]: Visualizes entities and relations as an interactive force-directed graph
+ */
+
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import ForceGraph2D from 'react-force-graph-2d';
-import { entityApi, relationApi, graphApi, type Entity, type Relation } from '../api/client';
+import { entityApi, relationApi, graphApi } from '../api/client';
+import { TYPE_COLORS } from '../constants';
 
 interface GraphNode {
   id: string;
@@ -9,6 +18,8 @@ interface GraphNode {
   type: string;
   val: number;
   color: string;
+  x?: number;
+  y?: number;
 }
 
 interface GraphLink {
@@ -16,15 +27,6 @@ interface GraphLink {
   target: string;
   type: string;
 }
-
-const TYPE_COLORS: Record<string, string> = {
-  person: '#3b82f6',
-  organization: '#10b981',
-  location: '#f59e0b',
-  concept: '#8b5cf6',
-  event: '#ef4444',
-  custom: '#6b7280',
-};
 
 export default function GraphViewer() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -63,7 +65,7 @@ export default function GraphViewer() {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  const graphData = useCallback(() => {
+  const graphData = useMemo(() => {
     if (selectedEntity && traversalData) {
       const nodes: GraphNode[] = traversalData.subGraph.entities.map((e) => ({
         id: e.id,
@@ -106,9 +108,9 @@ export default function GraphViewer() {
     return { nodes, links };
   }, [entities, relations, selectedEntity, traversalData]);
 
-  const handleNodeClick = useCallback((node: GraphNode) => {
+  const handleNodeClick = (node: GraphNode) => {
     setSelectedEntity(node.id === selectedEntity ? null : node.id);
-  }, [selectedEntity]);
+  };
 
   return (
     <div className="h-[calc(100vh-8rem)]">
@@ -171,7 +173,7 @@ export default function GraphViewer() {
           <ForceGraph2D
             width={dimensions.width}
             height={dimensions.height}
-            graphData={graphData()}
+            graphData={graphData}
             nodeLabel={(node: GraphNode) => `${node.name} (${node.type})`}
             nodeColor={(node: GraphNode) => node.color}
             nodeVal={(node: GraphNode) => node.val}

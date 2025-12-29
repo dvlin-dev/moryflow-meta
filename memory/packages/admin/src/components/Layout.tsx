@@ -1,3 +1,11 @@
+/**
+ * Layout component - Main app shell with sidebar navigation
+ *
+ * [PROPS]: { children } - Page content to render in main area
+ * [EMITS]: none
+ * [POS]: Root layout wrapper, used by App.tsx
+ */
+
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -7,16 +15,29 @@ import {
   Share2,
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import type { ReactNode } from 'react';
+
+const ICONS = {
+  LayoutDashboard,
+  Brain,
+  Network,
+  GitBranch,
+  Share2,
+} as const;
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Memories', href: '/memories', icon: Brain },
-  { name: 'Entities', href: '/entities', icon: Network },
-  { name: 'Relations', href: '/relations', icon: GitBranch },
-  { name: 'Graph', href: '/graph', icon: Share2 },
+  { name: 'Dashboard', href: '/', icon: 'LayoutDashboard' as const },
+  { name: 'Memories', href: '/memories', icon: 'Brain' as const },
+  { name: 'Entities', href: '/entities', icon: 'Network' as const },
+  { name: 'Relations', href: '/relations', icon: 'GitBranch' as const },
+  { name: 'Graph', href: '/graph', icon: 'Share2' as const },
 ];
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+interface LayoutProps {
+  children: ReactNode;
+}
+
+export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
   return (
@@ -31,6 +52,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 px-4">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href;
+            const Icon = ICONS[item.icon];
             return (
               <Link
                 key={item.name}
@@ -42,7 +64,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     : 'text-gray-300 hover:bg-gray-800'
                 )}
               >
-                <item.icon className="w-5 h-5" />
+                <Icon className="w-5 h-5" />
                 {item.name}
               </Link>
             );

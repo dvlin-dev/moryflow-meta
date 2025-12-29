@@ -1,5 +1,14 @@
-const API_BASE = '/api';
-const USER_ID = 'admin';
+/**
+ * HTTP client for Memory API
+ *
+ * [PROVIDES]: memoryApi, entityApi, relationApi, graphApi
+ * [DEPENDS]: ../constants
+ * [POS]: Core API client, used by all pages for data fetching
+ */
+
+import { API_BASE, USER_ID } from '../constants';
+
+// ============ Request Helper ============
 
 async function request<T>(
   method: string,
@@ -28,10 +37,14 @@ async function request<T>(
   }
 
   const text = await response.text();
-  return text ? JSON.parse(text) : null;
+  if (!text) {
+    return undefined as T;
+  }
+  return JSON.parse(text) as T;
 }
 
-// Types
+// ============ Types ============
+
 export interface Memory {
   id: string;
   content: string;
@@ -68,13 +81,8 @@ export interface Relation {
   createdAt: string;
 }
 
-export interface Stats {
-  memories: number;
-  entities: number;
-  relations: number;
-}
+// ============ Memory API ============
 
-// Memory API
 export const memoryApi = {
   list: (limit = 50, offset = 0) =>
     request<Memory[]>('GET', '/memories', undefined, {
@@ -102,15 +110,10 @@ export const memoryApi = {
 
   delete: (id: string) =>
     request<void>('DELETE', `/memories/${id}`, undefined, { userId: USER_ID }),
-
-  count: () =>
-    request<Memory[]>('GET', '/memories', undefined, {
-      userId: USER_ID,
-      limit: '1',
-    }).then((data) => data.length),
 };
 
-// Entity API
+// ============ Entity API ============
+
 export const entityApi = {
   list: (type?: string, limit = 50, offset = 0) =>
     request<Entity[]>('GET', '/entities', undefined, {
@@ -133,15 +136,10 @@ export const entityApi = {
 
   delete: (id: string) =>
     request<void>('DELETE', `/entities/${id}`, undefined, { userId: USER_ID }),
-
-  count: () =>
-    request<Entity[]>('GET', '/entities', undefined, {
-      userId: USER_ID,
-      limit: '1',
-    }).then((data) => data.length),
 };
 
-// Relation API
+// ============ Relation API ============
+
 export const relationApi = {
   list: (entityId?: string, type?: string, limit = 50) =>
     request<Relation[]>('GET', '/relations', undefined, {
@@ -156,15 +154,10 @@ export const relationApi = {
 
   delete: (id: string) =>
     request<void>('DELETE', `/relations/${id}`, undefined, { userId: USER_ID }),
-
-  count: () =>
-    request<Relation[]>('GET', '/relations', undefined, {
-      userId: USER_ID,
-      limit: '1',
-    }).then((data) => data.length),
 };
 
-// Graph API
+// ============ Graph API ============
+
 export const graphApi = {
   traverse: (entityId: string, depth = 2, direction: 'both' | 'outgoing' | 'incoming' = 'both') =>
     request<{
@@ -179,14 +172,4 @@ export const graphApi = {
       userId: USER_ID,
       maxDepth,
     }),
-};
-
-// Stats
-export const getStats = async (): Promise<Stats> => {
-  const [memories, entities, relations] = await Promise.all([
-    memoryApi.list(1).then((d) => d.length > 0 ? 100 : 0), // Simplified
-    entityApi.list(undefined, 1).then((d) => d.length > 0 ? 50 : 0),
-    relationApi.list(undefined, undefined, 1).then((d) => d.length > 0 ? 30 : 0),
-  ]);
-  return { memories, entities, relations };
 };

@@ -52,6 +52,7 @@ COPY --from=builder /app/memory/packages/core/dist ./memory/packages/core/dist
 COPY --from=builder /app/memory/packages/server/dist ./memory/packages/server/dist
 COPY --from=builder /app/memory/packages/server/src/generated ./memory/packages/server/src/generated
 COPY --from=builder /app/memory/packages/server/prisma ./memory/packages/server/prisma
+COPY --from=builder /app/memory/packages/server/prisma.config.ts ./memory/packages/server/
 
 # Copy entrypoint script (from builder, not build context)
 COPY --from=builder /app/memory/packages/server/docker-entrypoint.sh ./memory/packages/server/

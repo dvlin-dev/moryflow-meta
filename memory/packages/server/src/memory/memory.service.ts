@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmbeddingService } from '../embedding/embedding.service';
 import {
@@ -15,20 +16,12 @@ import {
   type ScoredMemoryItem,
   type SearchResult,
 } from '@moryflow/memory-core';
-
-interface RawMemoryRow {
-  id: string;
-  content: string;
-  user_id: string;
-  agent_id: string | null;
-  session_id: string | null;
-  source: string;
-  importance: number;
-  tags: string[];
-  created_at: Date;
-  updated_at: Date;
-  score?: number;
-}
+import {
+  type MemoryRow,
+  type ScoredMemoryRow,
+  type CountRow,
+} from '../common/types';
+import { toMemoryItem, toScoredMemoryItem } from '../common/mappers';
 
 @Injectable()
 export class MemoryService {
@@ -65,7 +58,7 @@ export class MemoryService {
       const vectorStr = `[${embeddingResult.value.join(',')}]`;
 
       // Insert into database using raw query for vector support
-      const result = await this.prisma.$queryRaw<RawMemoryRow[]>`
+      const result = await this.prisma.$queryRaw<MemoryRow[]>`
         INSERT INTO memories (
           content, embedding, user_id, agent_id, session_id,
           source, importance, tags, extra_metadata
@@ -91,7 +84,7 @@ export class MemoryService {
         return Err(createError(MemoryErrorCode.QUERY_FAILED, 'Failed to insert memory'));
       }
 
-      return Ok(this.mapToMemoryItem(row));
+      return Ok(toMemoryItem(row));
     } catch (error) {
       this.logger.error('Failed to add memory', error);
       return Err(
@@ -133,7 +126,7 @@ export class MemoryService {
       const filterConditions = this.buildFilterConditions(validOptions);
 
       // Vector similarity search
-      const memories = await this.prisma.$queryRaw<(RawMemoryRow & { score: number })[]>`
+      const memories = await this.prisma.$queryRaw<ScoredMemoryRow[]>`
         SELECT
           id, content, user_id, agent_id, session_id,
           source, importance, tags, created_at, updated_at,
@@ -147,11 +140,9 @@ export class MemoryService {
         LIMIT ${validOptions.limit}
       `;
 
-      const items: ScoredMemoryItem[] = memories.map((row) => ({
-        ...this.mapToMemoryItem(row),
-        score: row.score,
-        retrievalSource: 'vector' as const,
-      }));
+      const items: ScoredMemoryItem[] = memories.map((row: ScoredMemoryRow) =>
+        toScoredMemoryItem(row),
+      );
 
       return Ok({
         items,
@@ -172,7 +163,7 @@ export class MemoryService {
    */
   async getById(id: string, userId: string): Promise<Result<MemoryItem | null>> {
     try {
-      const result = await this.prisma.$queryRaw<RawMemoryRow[]>`
+      const result = await this.prisma.$queryRaw<MemoryRow[]>`
         SELECT
           id, content, user_id, agent_id, session_id,
           source, importance, tags, created_at, updated_at
@@ -185,7 +176,7 @@ export class MemoryService {
         return Ok(null);
       }
 
-      return Ok(this.mapToMemoryItem(row));
+      return Ok(toMemoryItem(row));
     } catch (error) {
       this.logger.error('Failed to get memory', error);
       return Err(
@@ -228,10 +219,10 @@ export class MemoryService {
     const offset = options?.offset ?? 0;
 
     try {
-      let result: RawMemoryRow[];
+      let result: MemoryRow[];
 
       if (options?.agentId) {
-        result = await this.prisma.$queryRaw<RawMemoryRow[]>`
+        result = await this.prisma.$queryRaw<MemoryRow[]>`
           SELECT
             id, content, user_id, agent_id, session_id,
             source, importance, tags, created_at, updated_at
@@ -241,7 +232,7 @@ export class MemoryService {
           LIMIT ${limit} OFFSET ${offset}
         `;
       } else {
-        result = await this.prisma.$queryRaw<RawMemoryRow[]>`
+        result = await this.prisma.$queryRaw<MemoryRow[]>`
           SELECT
             id, content, user_id, agent_id, session_id,
             source, importance, tags, created_at, updated_at
@@ -252,7 +243,7 @@ export class MemoryService {
         `;
       }
 
-      return Ok(result.map((row) => this.mapToMemoryItem(row)));
+      return Ok(result.map((row: MemoryRow) => toMemoryItem(row)));
     } catch (error) {
       this.logger.error('Failed to list memories', error);
       return Err(
@@ -268,15 +259,15 @@ export class MemoryService {
    */
   async count(userId: string, agentId?: string): Promise<Result<number>> {
     try {
-      let result: { count: bigint }[];
+      let result: CountRow[];
 
       if (agentId) {
-        result = await this.prisma.$queryRaw<{ count: bigint }[]>`
+        result = await this.prisma.$queryRaw<CountRow[]>`
           SELECT COUNT(*) as count FROM memories
           WHERE user_id = ${userId} AND agent_id = ${agentId}
         `;
       } else {
-        result = await this.prisma.$queryRaw<{ count: bigint }[]>`
+        result = await this.prisma.$queryRaw<CountRow[]>`
           SELECT COUNT(*) as count FROM memories
           WHERE user_id = ${userId}
         `;
@@ -298,30 +289,9 @@ export class MemoryService {
    * Build SQL filter conditions from search options
    * Note: This returns a Prisma.sql fragment for additional conditions
    */
-  private buildFilterConditions(options: SearchOptions): ReturnType<typeof import('@prisma/client').Prisma.sql> {
+  private buildFilterConditions(_options: SearchOptions): ReturnType<typeof Prisma.sql> {
     // For now, we'll handle basic filters in the main query
     // Complex filters can be added here
-    const { Prisma } = require('@prisma/client');
     return Prisma.empty;
-  }
-
-  /**
-   * Map database row to MemoryItem
-   */
-  private mapToMemoryItem(row: RawMemoryRow): MemoryItem {
-    return {
-      id: row.id,
-      content: row.content,
-      metadata: {
-        userId: row.user_id,
-        agentId: row.agent_id ?? undefined,
-        sessionId: row.session_id ?? undefined,
-        source: row.source as 'conversation' | 'document' | 'extraction',
-        importance: row.importance,
-        tags: row.tags,
-      },
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    };
   }
 }

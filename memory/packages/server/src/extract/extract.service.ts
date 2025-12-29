@@ -26,6 +26,8 @@ const ExtractedEntitySchema = z.object({
   confidence: z.number().min(0).max(1),
 });
 
+type ExtractedEntityFromSchema = z.infer<typeof ExtractedEntitySchema>;
+
 const EntityExtractionResultSchema = z.object({
   entities: z.array(ExtractedEntitySchema),
 });
@@ -37,6 +39,8 @@ const ExtractedRelationSchema = z.object({
   properties: z.record(z.string(), z.unknown()).optional(),
   confidence: z.number().min(0).max(1),
 });
+
+type ExtractedRelationFromSchema = z.infer<typeof ExtractedRelationSchema>;
 
 const RelationExtractionResultSchema = z.object({
   relations: z.array(ExtractedRelationSchema),
@@ -71,12 +75,14 @@ export class ExtractService {
         return Err(result.error);
       }
 
-      const entities: ExtractedEntity[] = result.value.entities.map((e) => ({
-        type: e.type,
-        name: e.name,
-        properties: e.properties,
-        confidence: e.confidence,
-      }));
+      const entities: ExtractedEntity[] = result.value.entities.map(
+        (e: ExtractedEntityFromSchema) => ({
+          type: e.type,
+          name: e.name,
+          properties: e.properties,
+          confidence: e.confidence,
+        }),
+      );
 
       this.logger.debug(`Extracted ${entities.length} entities from text`);
       return Ok(entities);
@@ -102,7 +108,7 @@ export class ExtractService {
     }
 
     try {
-      const entityNames = entities.map((e) => e.name);
+      const entityNames = entities.map((e: ExtractedEntity) => e.name);
       const prompt = buildRelationExtractionPrompt(text, entityNames);
 
       const result = await this.llm.generateStructured(
@@ -119,14 +125,14 @@ export class ExtractService {
       }
 
       // Filter relations to only include known entities
-      const entityNameSet = new Set(entityNames.map((n) => n.toLowerCase()));
+      const entityNameSet = new Set(entityNames.map((n: string) => n.toLowerCase()));
       const relations: ExtractedRelation[] = result.value.relations
         .filter(
-          (r) =>
+          (r: ExtractedRelationFromSchema) =>
             entityNameSet.has(r.sourceEntity.toLowerCase()) &&
             entityNameSet.has(r.targetEntity.toLowerCase()),
         )
-        .map((r) => ({
+        .map((r: ExtractedRelationFromSchema) => ({
           sourceEntity: r.sourceEntity,
           targetEntity: r.targetEntity,
           type: r.type,

@@ -13,18 +13,8 @@ import {
   type UpdateEntityInput,
   type Entity,
 } from '@moryflow/memory-core';
-
-interface RawEntityRow {
-  id: string;
-  type: string;
-  name: string;
-  properties: Record<string, unknown>;
-  user_id: string;
-  source: string | null;
-  confidence: number;
-  created_at: Date;
-  updated_at: Date;
-}
+import { type EntityRow, type ScoredEntityRow, type CountRow } from '../common/types';
+import { toEntity, toScoredEntity } from '../common/mappers';
 
 @Injectable()
 export class EntityService {
@@ -57,7 +47,7 @@ export class EntityService {
         ? `[${embeddingResult.value.join(',')}]`
         : null;
 
-      const result = await this.prisma.$queryRaw<RawEntityRow[]>`
+      const result = await this.prisma.$queryRaw<EntityRow[]>`
         INSERT INTO entities (
           type, name, properties, user_id, source, confidence, embedding
         )
@@ -84,7 +74,7 @@ export class EntityService {
         return Err(createError(MemoryErrorCode.QUERY_FAILED, 'Failed to create entity'));
       }
 
-      return Ok(this.mapToEntity(row));
+      return Ok(toEntity(row));
     } catch (error) {
       this.logger.error('Failed to create entity', error);
       return Err(
@@ -118,7 +108,7 @@ export class EntityService {
    */
   async getById(id: string, userId: string): Promise<Result<Entity | null>> {
     try {
-      const result = await this.prisma.$queryRaw<RawEntityRow[]>`
+      const result = await this.prisma.$queryRaw<EntityRow[]>`
         SELECT id, type, name, properties, user_id, source, confidence,
                created_at, updated_at
         FROM entities
@@ -126,7 +116,7 @@ export class EntityService {
       `;
 
       const row = result[0];
-      return Ok(row ? this.mapToEntity(row) : null);
+      return Ok(row ? toEntity(row) : null);
     } catch (error) {
       this.logger.error('Failed to get entity', error);
       return Err(
@@ -146,17 +136,17 @@ export class EntityService {
     type?: string,
   ): Promise<Result<Entity | null>> {
     try {
-      let result: RawEntityRow[];
+      let result: EntityRow[];
 
       if (type) {
-        result = await this.prisma.$queryRaw<RawEntityRow[]>`
+        result = await this.prisma.$queryRaw<EntityRow[]>`
           SELECT id, type, name, properties, user_id, source, confidence,
                  created_at, updated_at
           FROM entities
           WHERE user_id = ${userId} AND name = ${name} AND type = ${type}
         `;
       } else {
-        result = await this.prisma.$queryRaw<RawEntityRow[]>`
+        result = await this.prisma.$queryRaw<EntityRow[]>`
           SELECT id, type, name, properties, user_id, source, confidence,
                  created_at, updated_at
           FROM entities
@@ -166,7 +156,7 @@ export class EntityService {
       }
 
       const row = result[0];
-      return Ok(row ? this.mapToEntity(row) : null);
+      return Ok(row ? toEntity(row) : null);
     } catch (error) {
       this.logger.error('Failed to find entity', error);
       return Err(
@@ -196,10 +186,10 @@ export class EntityService {
 
       const vectorStr = `[${embeddingResult.value.join(',')}]`;
 
-      let result: (RawEntityRow & { score: number })[];
+      let result: ScoredEntityRow[];
 
       if (options?.type) {
-        result = await this.prisma.$queryRaw<(RawEntityRow & { score: number })[]>`
+        result = await this.prisma.$queryRaw<ScoredEntityRow[]>`
           SELECT id, type, name, properties, user_id, source, confidence,
                  created_at, updated_at,
                  1 - (embedding <=> ${vectorStr}::vector) as score
@@ -212,7 +202,7 @@ export class EntityService {
           LIMIT ${limit}
         `;
       } else {
-        result = await this.prisma.$queryRaw<(RawEntityRow & { score: number })[]>`
+        result = await this.prisma.$queryRaw<ScoredEntityRow[]>`
           SELECT id, type, name, properties, user_id, source, confidence,
                  created_at, updated_at,
                  1 - (embedding <=> ${vectorStr}::vector) as score
@@ -225,7 +215,7 @@ export class EntityService {
         `;
       }
 
-      return Ok(result.map((row) => ({ ...this.mapToEntity(row), score: row.score })));
+      return Ok(result.map((row: ScoredEntityRow) => toScoredEntity(row)));
     } catch (error) {
       this.logger.error('Failed to search entities', error);
       return Err(
@@ -247,10 +237,10 @@ export class EntityService {
     const offset = options?.offset ?? 0;
 
     try {
-      let result: RawEntityRow[];
+      let result: EntityRow[];
 
       if (options?.type) {
-        result = await this.prisma.$queryRaw<RawEntityRow[]>`
+        result = await this.prisma.$queryRaw<EntityRow[]>`
           SELECT id, type, name, properties, user_id, source, confidence,
                  created_at, updated_at
           FROM entities
@@ -259,7 +249,7 @@ export class EntityService {
           LIMIT ${limit} OFFSET ${offset}
         `;
       } else {
-        result = await this.prisma.$queryRaw<RawEntityRow[]>`
+        result = await this.prisma.$queryRaw<EntityRow[]>`
           SELECT id, type, name, properties, user_id, source, confidence,
                  created_at, updated_at
           FROM entities
@@ -269,7 +259,7 @@ export class EntityService {
         `;
       }
 
-      return Ok(result.map((row) => this.mapToEntity(row)));
+      return Ok(result.map((row: EntityRow) => toEntity(row)));
     } catch (error) {
       this.logger.error('Failed to list entities', error);
       return Err(
@@ -293,38 +283,32 @@ export class EntityService {
 
     const validInput = parsed.data;
 
+    // Check if there's anything to update
+    if (
+      validInput.name === undefined &&
+      validInput.type === undefined &&
+      validInput.properties === undefined &&
+      validInput.confidence === undefined
+    ) {
+      // Nothing to update, return existing
+      const existing = await this.getById(id, userId);
+      if (!existing.ok) return existing;
+      if (!existing.value) {
+        return Err(createError(MemoryErrorCode.NOT_FOUND, 'Entity not found'));
+      }
+      return Ok(existing.value);
+    }
+
     try {
-      // Build dynamic update
-      const updates: string[] = [];
-      const values: unknown[] = [];
-
-      if (validInput.name !== undefined) {
-        updates.push('name = $' + (values.length + 1));
-        values.push(validInput.name);
-      }
-      if (validInput.type !== undefined) {
-        updates.push('type = $' + (values.length + 1));
-        values.push(validInput.type);
-      }
-      if (validInput.properties !== undefined) {
-        updates.push('properties = $' + (values.length + 1) + '::jsonb');
-        values.push(JSON.stringify(validInput.properties));
-      }
-      if (validInput.confidence !== undefined) {
-        updates.push('confidence = $' + (values.length + 1));
-        values.push(validInput.confidence);
-      }
-
-      if (updates.length === 0) {
-        // Nothing to update, return existing
-        return this.getById(id, userId).then((r) =>
-          r.ok && r.value ? Ok(r.value) : Err(createError(MemoryErrorCode.NOT_FOUND, 'Entity not found')),
-        );
-      }
-
-      const result = await this.prisma.$queryRaw<RawEntityRow[]>`
+      // Use COALESCE for safe partial updates
+      const result = await this.prisma.$queryRaw<EntityRow[]>`
         UPDATE entities
-        SET ${updates.join(', ')}, updated_at = NOW()
+        SET
+          name = COALESCE(${validInput.name ?? null}, name),
+          type = COALESCE(${validInput.type ?? null}, type),
+          properties = COALESCE(${validInput.properties ? JSON.stringify(validInput.properties) : null}::jsonb, properties),
+          confidence = COALESCE(${validInput.confidence ?? null}, confidence),
+          updated_at = NOW()
         WHERE id = ${id}::uuid AND user_id = ${userId}
         RETURNING id, type, name, properties, user_id, source, confidence,
                   created_at, updated_at
@@ -335,7 +319,7 @@ export class EntityService {
         return Err(createError(MemoryErrorCode.NOT_FOUND, 'Entity not found'));
       }
 
-      return Ok(this.mapToEntity(row));
+      return Ok(toEntity(row));
     } catch (error) {
       this.logger.error('Failed to update entity', error);
       return Err(
@@ -372,15 +356,15 @@ export class EntityService {
    */
   async count(userId: string, type?: string): Promise<Result<number>> {
     try {
-      let result: { count: bigint }[];
+      let result: CountRow[];
 
       if (type) {
-        result = await this.prisma.$queryRaw<{ count: bigint }[]>`
+        result = await this.prisma.$queryRaw<CountRow[]>`
           SELECT COUNT(*) as count FROM entities
           WHERE user_id = ${userId} AND type = ${type}
         `;
       } else {
-        result = await this.prisma.$queryRaw<{ count: bigint }[]>`
+        result = await this.prisma.$queryRaw<CountRow[]>`
           SELECT COUNT(*) as count FROM entities
           WHERE user_id = ${userId}
         `;
@@ -396,19 +380,5 @@ export class EntityService {
         }),
       );
     }
-  }
-
-  private mapToEntity(row: RawEntityRow): Entity {
-    return {
-      id: row.id,
-      type: row.type as Entity['type'],
-      name: row.name,
-      properties: row.properties,
-      userId: row.user_id,
-      source: row.source,
-      confidence: row.confidence,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    };
   }
 }

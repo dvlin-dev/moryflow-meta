@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from './config';
 import { PrismaModule } from './prisma/prisma.module';
 import { MemoryModule } from './memory/memory.module';
 import { EntityModule } from './entity/entity.module';
@@ -9,6 +10,7 @@ import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
+    ConfigModule,
     PrismaModule,
     MemoryModule,
     EntityModule,

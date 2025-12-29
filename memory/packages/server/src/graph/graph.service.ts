@@ -12,44 +12,13 @@ import {
   type Relation,
   type SubGraph,
 } from '@moryflow/memory-core';
-
-interface TraversalNode {
-  entity: Entity;
-  depth: number;
-  path: string[];
-}
-
-interface TraversalResult {
-  nodes: TraversalNode[];
-  subGraph: SubGraph;
-}
-
-interface RawTraversalRow {
-  id: string;
-  type: string;
-  name: string;
-  properties: Record<string, unknown>;
-  user_id: string;
-  source: string | null;
-  confidence: number;
-  created_at: Date;
-  updated_at: Date;
-  depth: number;
-  path: string[];
-}
-
-interface RawRelationRow {
-  id: string;
-  source_id: string;
-  target_id: string;
-  type: string;
-  properties: Record<string, unknown>;
-  user_id: string;
-  confidence: number;
-  valid_from: Date | null;
-  valid_to: Date | null;
-  created_at: Date;
-}
+import {
+  type TraversalEntityRow,
+  type RelationRow,
+  type TraversalNode,
+  type TraversalResult,
+} from '../common/types';
+import { toEntity, toRelation } from '../common/mappers';
 
 @Injectable()
 export class GraphService {
@@ -76,7 +45,7 @@ export class GraphService {
 
     try {
       // Build the recursive CTE based on direction
-      let traversalResult: RawTraversalRow[];
+      let traversalResult: TraversalEntityRow[];
 
       if (direction === 'outgoing') {
         traversalResult = await this.traverseOutgoing(
@@ -105,15 +74,15 @@ export class GraphService {
       }
 
       // Map to entities
-      const entities = traversalResult.map((row) => this.mapToEntity(row));
-      const entityIds = entities.map((e) => e.id);
+      const entities = traversalResult.map((row: TraversalEntityRow) => toEntity(row));
+      const entityIds = entities.map((e: Entity) => e.id);
 
       // Get all relations between the traversed entities
       const relations = await this.getRelationsBetween(entityIds, userId);
 
       // Build traversal nodes
-      const nodes: TraversalNode[] = traversalResult.map((row) => ({
-        entity: this.mapToEntity(row),
+      const nodes: TraversalNode[] = traversalResult.map((row: TraversalEntityRow) => ({
+        entity: toEntity(row),
         depth: row.depth,
         path: row.path,
       }));
@@ -145,14 +114,14 @@ export class GraphService {
 
     try {
       // Get entities
-      const entitiesResult = await this.prisma.$queryRaw<RawTraversalRow[]>`
+      const entitiesResult = await this.prisma.$queryRaw<TraversalEntityRow[]>`
         SELECT id, type, name, properties, user_id, source, confidence,
                created_at, updated_at, 0 as depth, ARRAY[id::text] as path
         FROM entities
         WHERE id = ANY(${entityIds}::uuid[]) AND user_id = ${userId}
       `;
 
-      const entities = entitiesResult.map((row) => this.mapToEntity(row));
+      const entities = entitiesResult.map((row: TraversalEntityRow) => toEntity(row));
 
       // Get relations
       const relationsResult = await this.getRelationsBetween(entityIds, userId);
@@ -181,7 +150,7 @@ export class GraphService {
     maxDepth = 5,
   ): Promise<Result<TraversalNode[] | null>> {
     try {
-      const result = await this.prisma.$queryRaw<RawTraversalRow[]>`
+      const result = await this.prisma.$queryRaw<TraversalEntityRow[]>`
         WITH RECURSIVE path_search AS (
           -- Start from source
           SELECT
@@ -224,7 +193,7 @@ export class GraphService {
       const pathRow = result[0]!;
       const pathEntityIds = pathRow.path;
 
-      const pathEntities = await this.prisma.$queryRaw<RawTraversalRow[]>`
+      const pathEntities = await this.prisma.$queryRaw<TraversalEntityRow[]>`
         SELECT id, type, name, properties, user_id, source, confidence,
                created_at, updated_at, 0 as depth, ARRAY[id::text] as path
         FROM entities
@@ -232,15 +201,19 @@ export class GraphService {
       `;
 
       // Order by path position
-      const entityMap = new Map(pathEntities.map((e) => [e.id, e]));
-      const orderedNodes: TraversalNode[] = pathEntityIds.map((id, index) => {
-        const row = entityMap.get(id);
-        return {
-          entity: row ? this.mapToEntity(row) : ({} as Entity),
-          depth: index,
-          path: pathEntityIds.slice(0, index + 1),
-        };
-      }).filter((n) => n.entity.id);
+      const entityMap = new Map(
+        pathEntities.map((e: TraversalEntityRow) => [e.id, e] as const),
+      );
+      const orderedNodes: TraversalNode[] = pathEntityIds
+        .map((id: string, index: number) => {
+          const row = entityMap.get(id);
+          return {
+            entity: row ? toEntity(row) : ({} as Entity),
+            depth: index,
+            path: pathEntityIds.slice(0, index + 1),
+          };
+        })
+        .filter((n: TraversalNode) => n.entity.id);
 
       return Ok(orderedNodes);
     } catch (error) {
@@ -269,8 +242,8 @@ export class GraphService {
 
     // Filter to only include entities at the exact depth
     const neighbors = result.value.nodes
-      .filter((n) => n.depth === depth)
-      .map((n) => n.entity);
+      .filter((n: TraversalNode) => n.depth === depth)
+      .map((n: TraversalNode) => n.entity);
 
     return Ok(neighbors);
   }
@@ -283,8 +256,8 @@ export class GraphService {
     maxDepth: number,
     limit: number,
     relationTypes?: string[],
-  ): Promise<RawTraversalRow[]> {
-    return this.prisma.$queryRaw<RawTraversalRow[]>`
+  ): Promise<TraversalEntityRow[]> {
+    return this.prisma.$queryRaw<TraversalEntityRow[]>`
       WITH RECURSIVE graph AS (
         -- Base case: starting entity
         SELECT
@@ -325,8 +298,8 @@ export class GraphService {
     maxDepth: number,
     limit: number,
     relationTypes?: string[],
-  ): Promise<RawTraversalRow[]> {
-    return this.prisma.$queryRaw<RawTraversalRow[]>`
+  ): Promise<TraversalEntityRow[]> {
+    return this.prisma.$queryRaw<TraversalEntityRow[]>`
       WITH RECURSIVE graph AS (
         -- Base case
         SELECT
@@ -367,8 +340,8 @@ export class GraphService {
     maxDepth: number,
     limit: number,
     relationTypes?: string[],
-  ): Promise<RawTraversalRow[]> {
-    return this.prisma.$queryRaw<RawTraversalRow[]>`
+  ): Promise<TraversalEntityRow[]> {
+    return this.prisma.$queryRaw<TraversalEntityRow[]>`
       WITH RECURSIVE graph AS (
         -- Base case
         SELECT
@@ -415,7 +388,7 @@ export class GraphService {
     }
 
     try {
-      const result = await this.prisma.$queryRaw<RawRelationRow[]>`
+      const result = await this.prisma.$queryRaw<RelationRow[]>`
         SELECT id, source_id, target_id, type, properties, user_id,
                confidence, valid_from, valid_to, created_at
         FROM relations
@@ -424,7 +397,7 @@ export class GraphService {
           AND target_id = ANY(${entityIds}::uuid[])
       `;
 
-      return Ok(result.map((row) => this.mapToRelation(row)));
+      return Ok(result.map((row: RelationRow) => toRelation(row)));
     } catch (error) {
       this.logger.error('Failed to get relations between entities', error);
       return Err(
@@ -433,34 +406,5 @@ export class GraphService {
         }),
       );
     }
-  }
-
-  private mapToEntity(row: RawTraversalRow): Entity {
-    return {
-      id: row.id,
-      type: row.type as Entity['type'],
-      name: row.name,
-      properties: row.properties,
-      userId: row.user_id,
-      source: row.source,
-      confidence: row.confidence,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    };
-  }
-
-  private mapToRelation(row: RawRelationRow): Relation {
-    return {
-      id: row.id,
-      sourceId: row.source_id,
-      targetId: row.target_id,
-      type: row.type,
-      properties: row.properties,
-      userId: row.user_id,
-      confidence: row.confidence,
-      validFrom: row.valid_from,
-      validTo: row.valid_to,
-      createdAt: row.created_at,
-    };
   }
 }

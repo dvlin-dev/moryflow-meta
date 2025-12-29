@@ -20,9 +20,11 @@ import {
   type AddMemoryRequest,
   type SearchMemoryRequest,
   type MemoryItemResponse,
+  type ScoredMemoryItemResponse,
   type SearchResultResponse,
 } from './dto';
-import type { AddMemoryInput, SearchOptions } from '@moryflow/memory-core';
+import type { AddMemoryInput, SearchOptions, MemoryItem, ScoredMemoryItem } from '@moryflow/memory-core';
+import { toMemoryItemResponse, toScoredMemoryItemResponse } from '../common/mappers';
 
 @ApiTags('memories')
 @Controller('memories')
@@ -58,7 +60,7 @@ export class MemoryController {
       throw new BadRequestException(result.error.message);
     }
 
-    return this.toResponse(result.value);
+    return toMemoryItemResponse(result.value);
   }
 
   @Post('search')
@@ -86,11 +88,9 @@ export class MemoryController {
     }
 
     return {
-      items: result.value.items.map((item) => ({
-        ...this.toResponse(item),
-        score: item.score,
-        source: item.source,
-      })),
+      items: result.value.items.map((item: ScoredMemoryItem): ScoredMemoryItemResponse =>
+        toScoredMemoryItemResponse(item),
+      ),
       took: result.value.took,
     };
   }
@@ -118,7 +118,7 @@ export class MemoryController {
       throw new NotFoundException('Memory not found');
     }
 
-    return this.toResponse(result.value);
+    return toMemoryItemResponse(result.value);
   }
 
   @Get()
@@ -148,7 +148,7 @@ export class MemoryController {
       throw new BadRequestException(result.error.message);
     }
 
-    return result.value.map((item) => this.toResponse(item));
+    return result.value.map((item: MemoryItem) => toMemoryItemResponse(item));
   }
 
   @Delete(':id')
@@ -174,35 +174,5 @@ export class MemoryController {
     if (!result.value) {
       throw new NotFoundException('Memory not found');
     }
-  }
-
-  private toResponse(item: {
-    id: string;
-    content: string;
-    metadata: {
-      userId: string;
-      agentId?: string;
-      sessionId?: string;
-      source?: string;
-      importance?: number;
-      tags?: string[];
-    };
-    createdAt: Date;
-    updatedAt: Date;
-  }): MemoryItemResponse {
-    return {
-      id: item.id,
-      content: item.content,
-      metadata: {
-        userId: item.metadata.userId,
-        agentId: item.metadata.agentId,
-        sessionId: item.metadata.sessionId,
-        source: (item.metadata.source as 'conversation' | 'document' | 'extraction') ?? 'conversation',
-        importance: item.metadata.importance,
-        tags: item.metadata.tags,
-      },
-      createdAt: item.createdAt.toISOString(),
-      updatedAt: item.updatedAt.toISOString(),
-    };
   }
 }

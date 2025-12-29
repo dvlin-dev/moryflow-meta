@@ -1,0 +1,42 @@
+{
+  "name": "@moryflow/memory",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI Memory Module - Vector memory and knowledge graph for AI Agents",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "build:core": "pnpm --filter @moryflow/memory-core build",
+    "build:server": "pnpm --filter @moryflow/memory-server build",
+    "dev": "pnpm --filter @moryflow/memory-server dev",
+    "dev:admin": "pnpm --filter @moryflow/memory-admin dev",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"packages/**/*.{ts,tsx,json}\"",
+    "db:generate": "pnpm --filter @moryflow/memory-server db:generate",
+    "db:migrate": "pnpm --filter @moryflow/memory-server db:migrate",
+    "db:push": "pnpm --filter @moryflow/memory-server db:push",
+    "docker:up": "docker-compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker-compose -f docker/docker-compose.yml down",
+    "docker:logs": "docker-compose -f docker/docker-compose.yml logs -f"
+  },
+  "keywords": [
+    "ai",
+    "memory",
+    "vector",
+    "knowledge-graph",
+    "pgvector",
+    "mcp"
+  ],
+  "author": "Moryflow",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
+}

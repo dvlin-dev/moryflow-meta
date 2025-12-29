@@ -1,0 +1,46 @@
+services:
+  memory-db:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    container_name: memory-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-memory}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-memory_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-memory}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - memory_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-memory}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  memory-api:
+    build:
+      context: ../packages/server
+      dockerfile: Dockerfile
+    container_name: memory-api
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-memory}:${POSTGRES_PASSWORD:-memory_secret}@memory-db:5432/${POSTGRES_DB:-memory}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-v4}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4.1-mini}
+      PORT: 3000
+      NODE_ENV: production
+    ports:
+      - "${API_PORT:-8765}:3000"
+    depends_on:
+      memory-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  memory_data:

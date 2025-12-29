@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ Memory Table ============
+
+model Memory {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content   String   @db.Text
+  embedding Unsupported("vector(1024)")?
+
+  // Metadata
+  userId    String   @map("user_id") @db.VarChar(64)
+  agentId   String?  @map("agent_id") @db.VarChar(64)
+  sessionId String?  @map("session_id") @db.VarChar(64)
+  source    String   @default("conversation") @db.VarChar(32)
+  importance Float   @default(0.5)
+  tags      String[] @default([])
+  extraMetadata Json @default("{}") @map("extra_metadata")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([userId, createdAt(sort: Desc)], name: "idx_memories_user_created")
+  @@index([userId, agentId], name: "idx_memories_user_agent")
+  @@map("memories")
+}
+
+// ============ Entity Table ============
+
+model Entity {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type       String   @db.VarChar(32)
+  name       String   @db.VarChar(255)
+  properties Json     @default("{}")
+  embedding  Unsupported("vector(1024)")?
+
+  // Metadata
+  userId     String   @map("user_id") @db.VarChar(64)
+  source     String?  @db.VarChar(255)
+  confidence Float    @default(1.0)
+
+  // Timestamps
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  outgoingRelations Relation[] @relation("SourceEntity")
+  incomingRelations Relation[] @relation("TargetEntity")
+
+  @@unique([userId, type, name], name: "uq_entity_user_type_name")
+  @@index([userId], name: "idx_entities_user")
+  @@index([userId, type], name: "idx_entities_type")
+  @@map("entities")
+}
+
+// ============ Relation Table ============
+
+model Relation {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type       String   @db.VarChar(64)
+  properties Json     @default("{}")
+
+  // Foreign Keys
+  sourceId   String   @map("source_id") @db.Uuid
+  targetId   String   @map("target_id") @db.Uuid
+  source     Entity   @relation("SourceEntity", fields: [sourceId], references: [id], onDelete: Cascade)
+  target     Entity   @relation("TargetEntity", fields: [targetId], references: [id], onDelete: Cascade)
+
+  // Metadata
+  userId     String   @map("user_id") @db.VarChar(64)
+  confidence Float    @default(1.0)
+  validFrom  DateTime? @map("valid_from") @db.Timestamptz
+  validTo    DateTime? @map("valid_to") @db.Timestamptz
+
+  // Timestamps
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([userId], name: "idx_relations_user")
+  @@index([sourceId], name: "idx_relations_source")
+  @@index([targetId], name: "idx_relations_target")
+  @@index([userId, type], name: "idx_relations_type")
+  @@map("relations")
+}

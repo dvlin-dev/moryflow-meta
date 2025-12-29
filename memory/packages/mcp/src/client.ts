@@ -1,8 +1,73 @@
 /**
  * HTTP client for Memory API
+ *
+ * [PROVIDES]: MemoryApiClient - HTTP client for all Memory API operations
+ * [DEPENDS]: constants
+ * [POS]: Core API client, used by all MCP tools
  */
 
-const DEFAULT_API_URL = 'http://localhost:8765';
+import { z } from 'zod';
+import { DEFAULT_API_URL, DEFAULT_USER_ID } from './constants';
+
+// ============ Response Schemas ============
+
+const IdResponseSchema = z.object({
+  id: z.string(),
+});
+
+const MemoryItemSchema = z.object({
+  id: z.string(),
+  content: z.string(),
+  score: z.number().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const SearchResultSchema = z.object({
+  items: z.array(MemoryItemSchema),
+  took: z.number(),
+});
+
+const EntityItemSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  name: z.string(),
+  score: z.number().optional(),
+  properties: z.record(z.unknown()).optional(),
+});
+
+const RelationItemSchema = z.object({
+  id: z.string(),
+  sourceId: z.string(),
+  targetId: z.string(),
+  type: z.string(),
+});
+
+const TraverseNodeSchema = z.object({
+  entity: z.object({
+    id: z.string(),
+    type: z.string(),
+    name: z.string(),
+  }),
+  depth: z.number(),
+});
+
+const TraverseResultSchema = z.object({
+  nodes: z.array(TraverseNodeSchema),
+  subGraph: z.object({
+    entities: z.array(z.object({
+      id: z.string(),
+      type: z.string(),
+      name: z.string(),
+    })),
+    relations: z.array(z.object({
+      sourceId: z.string(),
+      targetId: z.string(),
+      type: z.string(),
+    })),
+  }),
+});
+
+// ============ Types ============
 
 interface ApiResponse<T> {
   ok: boolean;
@@ -10,18 +75,26 @@ interface ApiResponse<T> {
   error?: string;
 }
 
-export class MemoryApiClient {
-  private baseUrl: string;
-  private userId: string;
+export interface MemoryApiClientConfig {
+  apiUrl?: string;
+  userId?: string;
+}
 
-  constructor(config?: { apiUrl?: string; userId?: string }) {
+// ============ Client ============
+
+export class MemoryApiClient {
+  private readonly baseUrl: string;
+  private readonly userId: string;
+
+  constructor(config?: MemoryApiClientConfig) {
     this.baseUrl = config?.apiUrl ?? process.env.MEMORY_API_URL ?? DEFAULT_API_URL;
-    this.userId = config?.userId ?? process.env.MEMORY_USER_ID ?? 'default';
+    this.userId = config?.userId ?? process.env.MEMORY_USER_ID ?? DEFAULT_USER_ID;
   }
 
   private async request<T>(
     method: string,
     path: string,
+    schema?: z.ZodType<T>,
     body?: unknown,
     queryParams?: Record<string, string>,
   ): Promise<ApiResponse<T>> {
@@ -52,8 +125,18 @@ export class MemoryApiClient {
         return { ok: true, data: undefined };
       }
 
-      const data = JSON.parse(text) as T;
-      return { ok: true, data };
+      const json: unknown = JSON.parse(text);
+
+      // Validate response if schema provided
+      if (schema) {
+        const parsed = schema.safeParse(json);
+        if (!parsed.success) {
+          return { ok: false, error: `Invalid response: ${parsed.error.message}` };
+        }
+        return { ok: true, data: parsed.data };
+      }
+
+      return { ok: true, data: json as T };
     } catch (error) {
       return {
         ok: false,
@@ -69,7 +152,7 @@ export class MemoryApiClient {
     tags?: string[];
     importance?: number;
   }) {
-    return this.request<{ id: string }>('POST', '/memories', {
+    return this.request('POST', '/memories', IdResponseSchema, {
       content,
       metadata: {
         userId: this.userId,
@@ -84,15 +167,7 @@ export class MemoryApiClient {
     limit?: number;
     threshold?: number;
   }) {
-    return this.request<{
-      items: Array<{
-        id: string;
-        content: string;
-        score: number;
-        metadata: Record<string, unknown>;
-      }>;
-      took: number;
-    }>('POST', '/memories/search', {
+    return this.request('POST', '/memories/search', SearchResultSchema, {
       query,
       userId: this.userId,
       limit: options?.limit ?? 10,
@@ -101,11 +176,7 @@ export class MemoryApiClient {
   }
 
   async listMemories(options?: { limit?: number; offset?: number }) {
-    return this.request<Array<{
-      id: string;
-      content: string;
-      metadata: Record<string, unknown>;
-    }>>('GET', '/memories', undefined, {
+    return this.request('GET', '/memories', z.array(MemoryItemSchema), undefined, {
       userId: this.userId,
       ...(options?.limit && { limit: String(options.limit) }),
       ...(options?.offset && { offset: String(options.offset) }),
@@ -113,7 +184,7 @@ export class MemoryApiClient {
   }
 
   async deleteMemory(id: string) {
-    return this.request<void>('DELETE', `/memories/${id}`, undefined, {
+    return this.request<void>('DELETE', `/memories/${id}`, undefined, undefined, {
       userId: this.userId,
     });
   }
@@ -125,7 +196,7 @@ export class MemoryApiClient {
     name: string;
     properties?: Record<string, unknown>;
   }) {
-    return this.request<{ id: string }>('POST', '/entities', {
+    return this.request('POST', '/entities', IdResponseSchema, {
       ...entity,
       userId: this.userId,
     });
@@ -135,12 +206,7 @@ export class MemoryApiClient {
     type?: string;
     limit?: number;
   }) {
-    return this.request<Array<{
-      id: string;
-      type: string;
-      name: string;
-      score: number;
-    }>>('POST', '/entities/search', {
+    return this.request('POST', '/entities/search', z.array(EntityItemSchema), {
       query,
       userId: this.userId,
       ...options,
@@ -148,12 +214,7 @@ export class MemoryApiClient {
   }
 
   async listEntities(options?: { type?: string; limit?: number }) {
-    return this.request<Array<{
-      id: string;
-      type: string;
-      name: string;
-      properties: Record<string, unknown>;
-    }>>('GET', '/entities', undefined, {
+    return this.request('GET', '/entities', z.array(EntityItemSchema), undefined, {
       userId: this.userId,
       ...(options?.type && { type: options.type }),
       ...(options?.limit && { limit: String(options.limit) }),
@@ -168,19 +229,14 @@ export class MemoryApiClient {
     type: string;
     properties?: Record<string, unknown>;
   }) {
-    return this.request<{ id: string }>('POST', '/relations', {
+    return this.request('POST', '/relations', IdResponseSchema, {
       ...relation,
       userId: this.userId,
     });
   }
 
   async listRelations(options?: { entityId?: string; type?: string }) {
-    return this.request<Array<{
-      id: string;
-      sourceId: string;
-      targetId: string;
-      type: string;
-    }>>('GET', '/relations', undefined, {
+    return this.request('GET', '/relations', z.array(RelationItemSchema), undefined, {
       userId: this.userId,
       ...(options?.entityId && { entityId: options.entityId }),
       ...(options?.type && { type: options.type }),
@@ -193,16 +249,7 @@ export class MemoryApiClient {
     depth?: number;
     direction?: 'outgoing' | 'incoming' | 'both';
   }) {
-    return this.request<{
-      nodes: Array<{
-        entity: { id: string; type: string; name: string };
-        depth: number;
-      }>;
-      subGraph: {
-        entities: Array<{ id: string; type: string; name: string }>;
-        relations: Array<{ sourceId: string; targetId: string; type: string }>;
-      };
-    }>('POST', '/graph/traverse', {
+    return this.request('POST', '/graph/traverse', TraverseResultSchema, {
       entityId,
       userId: this.userId,
       ...options,
@@ -210,10 +257,7 @@ export class MemoryApiClient {
   }
 
   async findPath(sourceId: string, targetId: string, maxDepth?: number) {
-    return this.request<Array<{
-      entity: { id: string; type: string; name: string };
-      depth: number;
-    }>>('POST', '/graph/path', {
+    return this.request('POST', '/graph/path', z.array(TraverseNodeSchema), {
       sourceId,
       targetId,
       userId: this.userId,

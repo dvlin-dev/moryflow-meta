@@ -1,16 +1,29 @@
+/**
+ * Entity-related MCP tools
+ *
+ * [PROVIDES]: registerEntityTools - Register entity/relation CRUD tools
+ * [DEPENDS]: @modelcontextprotocol/sdk, @moryflow/memory-core, ../client, ../constants
+ */
+
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { EntityTypeSchema } from '@moryflow/memory-core';
 import type { MemoryApiClient } from '../client';
+import {
+  TOOL_ENTITY_CREATE,
+  TOOL_ENTITY_SEARCH,
+  TOOL_ENTITY_LIST,
+  TOOL_RELATION_CREATE,
+  TOOL_RELATION_LIST,
+} from '../constants';
 
 export function registerEntityTools(server: McpServer, client: MemoryApiClient) {
   // Create entity
   server.tool(
-    'entity_create',
+    TOOL_ENTITY_CREATE,
     'Create a new entity in the knowledge graph. Use this to add people, organizations, concepts, etc.',
     {
-      type: z
-        .enum(['person', 'organization', 'location', 'concept', 'event', 'custom'])
-        .describe('Type of entity'),
+      type: EntityTypeSchema.describe('Type of entity'),
       name: z.string().describe('Name of the entity'),
       properties: z.record(z.string(), z.unknown()).optional().describe('Additional properties'),
     },
@@ -34,14 +47,11 @@ export function registerEntityTools(server: McpServer, client: MemoryApiClient) 
 
   // Search entities
   server.tool(
-    'entity_search',
+    TOOL_ENTITY_SEARCH,
     'Search for entities by name or semantic similarity.',
     {
       query: z.string().describe('Search query'),
-      type: z
-        .enum(['person', 'organization', 'location', 'concept', 'event', 'custom'])
-        .optional()
-        .describe('Filter by entity type'),
+      type: EntityTypeSchema.optional().describe('Filter by entity type'),
       limit: z.number().min(1).max(50).optional().describe('Maximum results'),
     },
     async ({ query, type, limit }) => {
@@ -62,7 +72,7 @@ export function registerEntityTools(server: McpServer, client: MemoryApiClient) 
       }
 
       const entities = data
-        .map((e, i) => `${i + 1}. [${e.type}] ${e.name} (score: ${e.score.toFixed(3)})`)
+        .map((e, i) => `${i + 1}. [${e.type}] ${e.name} (score: ${e.score?.toFixed(3) ?? 'N/A'})`)
         .join('\n');
 
       return {
@@ -73,13 +83,10 @@ export function registerEntityTools(server: McpServer, client: MemoryApiClient) 
 
   // List entities
   server.tool(
-    'entity_list',
+    TOOL_ENTITY_LIST,
     'List all entities in the knowledge graph.',
     {
-      type: z
-        .enum(['person', 'organization', 'location', 'concept', 'event', 'custom'])
-        .optional()
-        .describe('Filter by entity type'),
+      type: EntityTypeSchema.optional().describe('Filter by entity type'),
       limit: z.number().min(1).max(100).optional().describe('Maximum results'),
     },
     async ({ type, limit }) => {
@@ -109,7 +116,7 @@ export function registerEntityTools(server: McpServer, client: MemoryApiClient) 
 
   // Create relation
   server.tool(
-    'relation_create',
+    TOOL_RELATION_CREATE,
     'Create a relationship between two entities.',
     {
       sourceId: z.string().describe('ID of the source entity'),
@@ -135,7 +142,7 @@ export function registerEntityTools(server: McpServer, client: MemoryApiClient) 
 
   // List relations
   server.tool(
-    'relation_list',
+    TOOL_RELATION_LIST,
     'List relationships, optionally filtered by entity or type.',
     {
       entityId: z.string().optional().describe('Filter by entity ID'),

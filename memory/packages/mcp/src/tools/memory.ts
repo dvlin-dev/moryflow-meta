@@ -1,11 +1,24 @@
+/**
+ * Memory-related MCP tools
+ *
+ * [PROVIDES]: registerMemoryTools - Register memory CRUD tools
+ * [DEPENDS]: @modelcontextprotocol/sdk, ../client, ../constants
+ */
+
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { MemoryApiClient } from '../client';
+import {
+  TOOL_MEMORY_ADD,
+  TOOL_MEMORY_SEARCH,
+  TOOL_MEMORY_LIST,
+  TOOL_MEMORY_DELETE,
+} from '../constants';
 
 export function registerMemoryTools(server: McpServer, client: MemoryApiClient) {
   // Add memory
   server.tool(
-    'memory_add',
+    TOOL_MEMORY_ADD,
     'Add a new memory to the memory store. Use this to remember important information from conversations.',
     {
       content: z.string().describe('The content to remember'),
@@ -41,7 +54,7 @@ export function registerMemoryTools(server: McpServer, client: MemoryApiClient) 
 
   // Search memories
   server.tool(
-    'memory_search',
+    TOOL_MEMORY_SEARCH,
     'Search for relevant memories using semantic similarity. Use this to recall past conversations or information.',
     {
       query: z.string().describe('Search query'),
@@ -71,7 +84,7 @@ export function registerMemoryTools(server: McpServer, client: MemoryApiClient) 
       }
 
       const memories = data.items
-        .map((m, i) => `${i + 1}. [Score: ${m.score.toFixed(3)}] ${m.content}`)
+        .map((m, i) => `${i + 1}. [Score: ${m.score?.toFixed(3) ?? 'N/A'}] ${m.content}`)
         .join('\n\n');
 
       return {
@@ -87,7 +100,7 @@ export function registerMemoryTools(server: McpServer, client: MemoryApiClient) 
 
   // List memories
   server.tool(
-    'memory_list',
+    TOOL_MEMORY_LIST,
     'List recent memories. Use this to see what has been stored.',
     {
       limit: z.number().min(1).max(100).optional().describe('Maximum results'),
@@ -122,7 +135,7 @@ export function registerMemoryTools(server: McpServer, client: MemoryApiClient) 
 
   // Delete memory
   server.tool(
-    'memory_delete',
+    TOOL_MEMORY_DELETE,
     'Delete a specific memory by its ID.',
     {
       id: z.string().describe('The ID of the memory to delete'),

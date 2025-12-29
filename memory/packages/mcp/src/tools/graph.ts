@@ -1,11 +1,19 @@
+/**
+ * Graph traversal MCP tools
+ *
+ * [PROVIDES]: registerGraphTools - Register graph traversal tools
+ * [DEPENDS]: @modelcontextprotocol/sdk, ../client, ../constants
+ */
+
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { MemoryApiClient } from '../client';
+import { TOOL_GRAPH_TRAVERSE, TOOL_GRAPH_FIND_PATH } from '../constants';
 
 export function registerGraphTools(server: McpServer, client: MemoryApiClient) {
   // Traverse graph
   server.tool(
-    'graph_traverse',
+    TOOL_GRAPH_TRAVERSE,
     'Traverse the knowledge graph starting from an entity. Use this to explore relationships.',
     {
       entityId: z.string().describe('Starting entity ID'),
@@ -58,7 +66,7 @@ export function registerGraphTools(server: McpServer, client: MemoryApiClient) {
 
   // Find path
   server.tool(
-    'graph_find_path',
+    TOOL_GRAPH_FIND_PATH,
     'Find the shortest path between two entities in the knowledge graph.',
     {
       sourceId: z.string().describe('Starting entity ID'),

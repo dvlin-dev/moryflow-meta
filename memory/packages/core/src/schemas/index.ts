@@ -1,0 +1,43 @@
+// Memory Schemas
+export {
+  MemorySourceSchema,
+  MemoryMetadataSchema,
+  AddMemoryInputSchema,
+  UpdateMemoryInputSchema,
+  DateRangeSchema,
+  SearchFilterSchema,
+  SearchOptionsSchema,
+  MemoryItemSchema,
+  ScoredMemoryItemSchema,
+  type MemorySource,
+  type MemoryMetadata,
+  type AddMemoryInput,
+  type UpdateMemoryInput,
+  type DateRange,
+  type SearchFilter,
+  type SearchOptions,
+  type MemoryItem,
+  type ScoredMemoryItem,
+} from './memory.schema.js';
+
+// Graph Schemas
+export {
+  EntityTypeSchema,
+  CreateEntityInputSchema,
+  UpdateEntityInputSchema,
+  CreateRelationInputSchema,
+  TraverseDirectionSchema,
+  TraverseOptionsSchema,
+  EntitySchema,
+  RelationSchema,
+  SubGraphSchema,
+  type EntityType,
+  type CreateEntityInput,
+  type UpdateEntityInput,
+  type CreateRelationInput,
+  type TraverseDirection,
+  type TraverseOptions,
+  type Entity,
+  type Relation,
+  type SubGraph,
+} from './graph.schema.js';

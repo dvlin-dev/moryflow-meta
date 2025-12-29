@@ -52,8 +52,8 @@ COPY --from=builder /app/memory/packages/server/dist ./memory/packages/server/di
 COPY --from=builder /app/memory/packages/server/src/generated ./memory/packages/server/src/generated
 COPY --from=builder /app/memory/packages/server/prisma ./memory/packages/server/prisma
 
-# Copy entrypoint script
-COPY memory/packages/server/docker-entrypoint.sh ./memory/packages/server/
+# Copy entrypoint script (from builder, not build context)
+COPY --from=builder /app/memory/packages/server/docker-entrypoint.sh ./memory/packages/server/
 RUN chmod +x ./memory/packages/server/docker-entrypoint.sh
 
 WORKDIR /app/memory/packages/server

@@ -17,28 +17,5 @@ services:
       retries: 5
     restart: unless-stopped
 
-  memory-api:
-    build:
-      context: ../packages/server
-      dockerfile: Dockerfile
-    container_name: memory-api
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-memory}:${POSTGRES_PASSWORD:-memory_secret}@memory-db:5432/${POSTGRES_DB:-memory}
-      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY}
-      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL}
-      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-v4}
-      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
-      LLM_API_KEY: ${LLM_API_KEY}
-      LLM_BASE_URL: ${LLM_BASE_URL}
-      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
-      PORT: 3000
-      NODE_ENV: production
-    ports:
-      - "${API_PORT:-8765}:3000"
-    depends_on:
-      memory-db:
-        condition: service_healthy
-    restart: unless-stopped
-
 volumes:
   memory_data:

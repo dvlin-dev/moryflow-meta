@@ -19,7 +19,7 @@ export const MemoryMetadataSchema = z.object({
 export const SearchFilterSchema = z.object({
   agentId: z.string().optional(),
   sessionId: z.string().optional(),
-  source: z.string().optional(),
+  source: z.enum(['conversation', 'document', 'extraction']).optional(),
   tags: z.array(z.string()).optional(),
 });
 

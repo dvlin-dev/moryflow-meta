@@ -66,7 +66,7 @@ export class OpenAIAdapter implements LLMAdapter {
       }
       messages.push({ role: 'user', content: prompt });
 
-      const response = await this.client.beta.chat.completions.parse({
+      const response = await this.client.chat.completions.create({
         model: this.model,
         messages,
         response_format: zodResponseFormat(schema, 'result'),
@@ -74,14 +74,22 @@ export class OpenAIAdapter implements LLMAdapter {
         max_tokens: options?.maxTokens,
       });
 
-      const parsed = response.choices[0]?.message?.parsed;
-      if (!parsed) {
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        return Err(
+          createError(MemoryErrorCode.PARSE_ERROR, 'Failed to get structured response'),
+        );
+      }
+
+      // Parse JSON response
+      const parsed = schema.safeParse(JSON.parse(content));
+      if (!parsed.success) {
         return Err(
           createError(MemoryErrorCode.PARSE_ERROR, 'Failed to parse structured response'),
         );
       }
 
-      return Ok(parsed as T);
+      return Ok(parsed.data as T);
     } catch (error) {
       return Err(
         createError(MemoryErrorCode.LLM_ERROR, 'Structured generation failed', {

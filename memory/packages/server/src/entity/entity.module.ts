@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { EntityService } from './entity.service.js';
-import { EntityController } from './entity.controller.js';
-import { EmbeddingModule } from '../embedding/embedding.module.js';
+import { EntityService } from './entity.service';
+import { EntityController } from './entity.controller';
+import { EmbeddingModule } from '../embedding/embedding.module';
 
 @Module({
   imports: [EmbeddingModule],

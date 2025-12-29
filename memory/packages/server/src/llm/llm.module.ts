@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { LLMService } from './llm.service.js';
+import { LLMService } from './llm.service';
 
 @Module({
   providers: [LLMService],

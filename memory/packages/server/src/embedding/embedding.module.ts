@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { EmbeddingService } from './embedding.service.js';
+import { EmbeddingService } from './embedding.service';
 
 @Module({
   providers: [EmbeddingService],

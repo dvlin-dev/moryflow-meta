@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from './prisma/prisma.module.js';
-import { MemoryModule } from './memory/memory.module.js';
-import { EntityModule } from './entity/entity.module.js';
-import { RelationModule } from './relation/relation.module.js';
-import { GraphModule } from './graph/graph.module.js';
-import { ExtractModule } from './extract/extract.module.js';
-import { HealthModule } from './health/health.module.js';
+import { PrismaModule } from './prisma/prisma.module';
+import { MemoryModule } from './memory/memory.module';
+import { EntityModule } from './entity/entity.module';
+import { RelationModule } from './relation/relation.module';
+import { GraphModule } from './graph/graph.module';
+import { ExtractModule } from './extract/extract.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [

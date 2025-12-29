@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service.js';
-import { EmbeddingService } from '../embedding/embedding.service.js';
+import { PrismaService } from '../prisma/prisma.service';
+import { EmbeddingService } from '../embedding/embedding.service';
 import {
   type Result,
   Ok,

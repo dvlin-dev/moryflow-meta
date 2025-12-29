@@ -12,7 +12,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { RelationService } from './relation.service.js';
+import { RelationService } from './relation.service';
 import type { CreateRelationInput, Relation } from '@moryflow/memory-core';
 
 class CreateRelationDto {

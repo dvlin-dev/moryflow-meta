@@ -12,7 +12,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { MemoryService } from './memory.service.js';
+import { MemoryService } from './memory.service';
 import type { AddMemoryInput, SearchOptions, MemoryItem, SearchResult } from '@moryflow/memory-core';
 
 // ============ DTOs ============

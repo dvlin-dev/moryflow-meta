@@ -13,7 +13,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { EntityService } from './entity.service.js';
+import { EntityService } from './entity.service';
 import type { CreateEntityInput, UpdateEntityInput, Entity } from '@moryflow/memory-core';
 
 class CreateEntityDto {

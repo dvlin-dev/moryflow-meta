@@ -1,8 +1,8 @@
 // ============ Schemas ============
-export * from './schemas/index.js';
+export * from './schemas/index';
 
 // ============ Types ============
-export * from './types.js';
+export * from './types';
 
 // ============ Errors ============
 export {
@@ -19,4 +19,4 @@ export {
   unwrapOr,
   mapResult,
   flatMapResult,
-} from './errors.js';
+} from './errors';

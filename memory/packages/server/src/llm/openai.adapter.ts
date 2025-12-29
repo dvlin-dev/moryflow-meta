@@ -8,7 +8,7 @@ import {
   createError,
   MemoryErrorCode,
 } from '@moryflow/memory-core';
-import type { LLMAdapter, GenerateOptions } from './llm.types.js';
+import type { LLMAdapter, GenerateOptions } from './llm.types';
 
 export class OpenAIAdapter implements LLMAdapter {
   private client: OpenAI;

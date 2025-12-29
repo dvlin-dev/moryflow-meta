@@ -10,13 +10,13 @@ import {
   type ExtractedRelation,
   type ExtractionResult,
 } from '@moryflow/memory-core';
-import { LLMService } from '../llm/llm.service.js';
+import { LLMService } from '../llm/llm.service';
 import {
   ENTITY_EXTRACTION_SYSTEM_PROMPT,
   RELATION_EXTRACTION_SYSTEM_PROMPT,
   buildEntityExtractionPrompt,
   buildRelationExtractionPrompt,
-} from './prompts.js';
+} from './prompts';
 
 // Zod schemas for LLM structured output
 const ExtractedEntitySchema = z.object({

@@ -18,7 +18,7 @@ export {
   type SearchOptions,
   type MemoryItem,
   type ScoredMemoryItem,
-} from './memory.schema.js';
+} from './memory.schema';
 
 // Graph Schemas
 export {
@@ -40,4 +40,4 @@ export {
   type Entity,
   type Relation,
   type SubGraph,
-} from './graph.schema.js';
+} from './graph.schema';

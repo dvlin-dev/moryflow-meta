@@ -9,7 +9,7 @@ import {
   unwrap,
   unwrapOr,
   mapResult,
-} from './errors.js';
+} from './errors';
 
 describe('Result type', () => {
   describe('Ok', () => {

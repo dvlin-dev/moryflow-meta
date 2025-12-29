@@ -1,9 +1,9 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { MemoryApiClient } from './client.js';
-import { registerMemoryTools } from './tools/memory.js';
-import { registerEntityTools } from './tools/entity.js';
-import { registerGraphTools } from './tools/graph.js';
+import { MemoryApiClient } from './client';
+import { registerMemoryTools } from './tools/memory';
+import { registerEntityTools } from './tools/entity';
+import { registerGraphTools } from './tools/graph';
 
 // Create MCP server
 const server = new McpServer({

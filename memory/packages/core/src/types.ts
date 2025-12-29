@@ -6,7 +6,7 @@ import type {
   Entity,
   Relation,
   SubGraph,
-} from './schemas/index.js';
+} from './schemas/index';
 
 // Re-export schema types
 export type {

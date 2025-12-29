@@ -9,7 +9,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { GraphService } from './graph.service.js';
+import { GraphService } from './graph.service';
 import type { Entity, Relation, SubGraph } from '@moryflow/memory-core';
 
 interface TraversalNode {

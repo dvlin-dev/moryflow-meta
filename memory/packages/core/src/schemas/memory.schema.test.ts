@@ -3,7 +3,7 @@ import {
   MemoryMetadataSchema,
   AddMemoryInputSchema,
   SearchOptionsSchema,
-} from './memory.schema.js';
+} from './memory.schema';
 
 describe('MemoryMetadataSchema', () => {
   it('should validate valid metadata', () => {

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ExtractService } from './extract.service.js';
-import { LLMModule } from '../llm/llm.module.js';
+import { ExtractService } from './extract.service';
+import { LLMModule } from '../llm/llm.module';
 
 @Module({
   imports: [LLMModule],

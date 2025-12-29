@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { z } from 'zod';
 import type { Result } from '@moryflow/memory-core';
-import type { LLMAdapter, GenerateOptions } from './llm.types.js';
-import { OpenAIAdapter } from './openai.adapter.js';
+import type { LLMAdapter, GenerateOptions } from './llm.types';
+import { OpenAIAdapter } from './openai.adapter';
 
 @Injectable()
 export class LLMService implements LLMAdapter {

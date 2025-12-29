@@ -5,183 +5,197 @@
  * [EMITS]: none
  * [POS]: Main page for viewing, searching, adding, and deleting memories
  */
-
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Plus, Trash2 } from 'lucide-react';
-import { memoryApi, type Memory } from '../api/client';
-import Modal from '../components/Modal';
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Search, Plus, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { memoryApi, type Memory } from '@/api/client'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function Memories() {
-  const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newContent, setNewContent] = useState('');
+  const queryClient = useQueryClient()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newContent, setNewContent] = useState('')
 
   const { data: memories, isLoading } = useQuery({
     queryKey: ['memories', 'list'],
     queryFn: () => memoryApi.list(100),
-  });
+  })
 
   const { data: searchResults } = useQuery({
     queryKey: ['memories', 'search', searchQuery],
     queryFn: () => memoryApi.search(searchQuery),
     enabled: isSearching && searchQuery.length > 0,
-  });
+  })
 
   const createMutation = useMutation({
     mutationFn: (content: string) => memoryApi.create(content),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['memories'] });
-      setShowAddModal(false);
-      setNewContent('');
+      queryClient.invalidateQueries({ queryKey: ['memories'] })
+      setShowAddModal(false)
+      setNewContent('')
+      toast.success('Memory added successfully')
     },
-  });
+    onError: () => {
+      toast.error('Failed to add memory')
+    },
+  })
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => memoryApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['memories'] });
+      queryClient.invalidateQueries({ queryKey: ['memories'] })
+      toast.success('Memory deleted')
     },
-  });
+    onError: () => {
+      toast.error('Failed to delete memory')
+    },
+  })
 
-  const displayMemories = isSearching && searchResults ? searchResults.items : memories;
+  const displayMemories = isSearching && searchResults ? searchResults.items : memories
 
   const handleCloseModal = () => {
-    setShowAddModal(false);
-    setNewContent('');
-  };
+    setShowAddModal(false)
+    setNewContent('')
+  }
+
+  const handleClear = () => {
+    setIsSearching(false)
+    setSearchQuery('')
+  }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Memories</h1>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="btn btn-primary flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
+        <Button onClick={() => setShowAddModal(true)}>
+          <Plus className="w-4 h-4 mr-2" />
           Add Memory
-        </button>
+        </Button>
       </div>
 
       {/* Search */}
-      <div className="card mb-6">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search memories semantically..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && setIsSearching(true)}
-              className="input pl-10"
-            />
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input
+                placeholder="Search memories semantically..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && setIsSearching(true)}
+                className="pl-10"
+              />
+            </div>
+            <Button onClick={() => setIsSearching(true)}>Search</Button>
+            {isSearching && (
+              <Button variant="secondary" onClick={handleClear}>
+                Clear
+              </Button>
+            )}
           </div>
-          <button
-            onClick={() => setIsSearching(true)}
-            className="btn btn-primary"
-          >
-            Search
-          </button>
-          {isSearching && (
-            <button
-              onClick={() => {
-                setIsSearching(false);
-                setSearchQuery('');
-              }}
-              className="btn btn-secondary"
-            >
-              Clear
-            </button>
+          {isSearching && searchResults && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Found {searchResults.items.length} results in {searchResults.took}ms
+            </p>
           )}
-        </div>
-        {isSearching && searchResults && (
-          <p className="mt-2 text-sm text-gray-500">
-            Found {searchResults.items.length} results in {searchResults.took}ms
-          </p>
-        )}
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Memory List */}
-      <div className="card">
-        {isLoading ? (
-          <p className="text-gray-500">Loading...</p>
-        ) : !displayMemories || displayMemories.length === 0 ? (
-          <p className="text-gray-500">No memories found</p>
-        ) : (
-          <div className="divide-y">
-            {displayMemories.map((memory: Memory & { score?: number }) => (
-              <div key={memory.id} className="py-4 first:pt-0 last:pb-0">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex-1">
-                    <p className="text-gray-900">{memory.content}</p>
-                    <div className="flex gap-4 mt-2 text-sm text-gray-500">
-                      <span>Source: {memory.metadata.source}</span>
-                      {memory.score !== undefined && (
-                        <span>Score: {memory.score.toFixed(3)}</span>
-                      )}
-                      <span>
-                        {new Date(memory.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    {memory.metadata.tags.length > 0 && (
-                      <div className="flex gap-2 mt-2">
-                        {memory.metadata.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-1 bg-gray-100 rounded text-xs"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+      <Card>
+        <CardContent className="pt-6">
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ) : !displayMemories || displayMemories.length === 0 ? (
+            <p className="text-muted-foreground">No memories found</p>
+          ) : (
+            <div className="divide-y">
+              {displayMemories.map((memory: Memory & { score?: number }) => (
+                <div key={memory.id} className="py-4 first:pt-0 last:pb-0">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <p className="text-foreground">{memory.content}</p>
+                      <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+                        <span>Source: {memory.metadata.source}</span>
+                        {memory.score !== undefined && (
+                          <span>Score: {memory.score.toFixed(3)}</span>
+                        )}
+                        <span>
+                          {new Date(memory.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
-                    )}
+                      {memory.metadata.tags.length > 0 && (
+                        <div className="flex gap-2 mt-2">
+                          {memory.metadata.tags.map((tag) => (
+                            <Badge key={tag} variant="secondary">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteMutation.mutate(memory.id)}
+                      disabled={deleteMutation.isPending}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <button
-                    onClick={() => deleteMutation.mutate(memory.id)}
-                    className="p-2 text-gray-400 hover:text-red-500"
-                    disabled={deleteMutation.isPending}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Add Modal */}
-      <Modal
-        isOpen={showAddModal}
-        onClose={handleCloseModal}
-        title="Add Memory"
-        maxWidth="lg"
-        footer={
-          <>
-            <button onClick={handleCloseModal} className="btn btn-secondary">
+      {/* Add Dialog */}
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Memory</DialogTitle>
+          </DialogHeader>
+          <Textarea
+            value={newContent}
+            onChange={(e) => setNewContent(e.target.value)}
+            placeholder="Enter memory content..."
+            className="min-h-[120px]"
+          />
+          <DialogFooter>
+            <Button variant="secondary" onClick={handleCloseModal}>
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => createMutation.mutate(newContent)}
               disabled={!newContent.trim() || createMutation.isPending}
-              className="btn btn-primary"
             >
               {createMutation.isPending ? 'Adding...' : 'Add Memory'}
-            </button>
-          </>
-        }
-      >
-        <textarea
-          value={newContent}
-          onChange={(e) => setNewContent(e.target.value)}
-          placeholder="Enter memory content..."
-          className="input min-h-[120px] resize-none"
-        />
-      </Modal>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  );
+  )
 }

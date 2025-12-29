@@ -5,122 +5,212 @@
  * [EMITS]: none
  * [POS]: Main page for viewing, adding, and deleting relations between entities
  */
-
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, ArrowRight } from 'lucide-react';
-import { relationApi, entityApi, type Relation, type Entity } from '../api/client';
-import Modal from '../components/Modal';
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Plus, Trash2, ArrowRight } from 'lucide-react'
+import { toast } from 'sonner'
+import { relationApi, entityApi, type Relation, type Entity } from '@/api/client'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
 
 export default function Relations() {
-  const queryClient = useQueryClient();
-  const [showAddModal, setShowAddModal] = useState(false);
+  const queryClient = useQueryClient()
+  const [showAddModal, setShowAddModal] = useState(false)
   const [newRelation, setNewRelation] = useState({
     sourceId: '',
     targetId: '',
     type: '',
-  });
+  })
 
   const { data: relations, isLoading } = useQuery({
     queryKey: ['relations', 'list'],
     queryFn: () => relationApi.list(),
-  });
+  })
 
   const { data: entities } = useQuery({
     queryKey: ['entities', 'list'],
     queryFn: () => entityApi.list(),
-  });
+  })
 
   const createMutation = useMutation({
     mutationFn: (data: { sourceId: string; targetId: string; type: string }) =>
       relationApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['relations'] });
-      setShowAddModal(false);
-      setNewRelation({ sourceId: '', targetId: '', type: '' });
+      queryClient.invalidateQueries({ queryKey: ['relations'] })
+      setShowAddModal(false)
+      setNewRelation({ sourceId: '', targetId: '', type: '' })
+      toast.success('Relation created successfully')
     },
-  });
+    onError: () => {
+      toast.error('Failed to create relation')
+    },
+  })
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => relationApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['relations'] });
+      queryClient.invalidateQueries({ queryKey: ['relations'] })
+      toast.success('Relation deleted')
     },
-  });
+    onError: () => {
+      toast.error('Failed to delete relation')
+    },
+  })
 
   const getEntityName = (id: string) => {
-    const entity = entities?.find((e) => e.id === id);
-    return entity?.name ?? id.slice(0, 8);
-  };
+    const entity = entities?.find((e) => e.id === id)
+    return entity?.name ?? id.slice(0, 8)
+  }
 
   const handleCloseModal = () => {
-    setShowAddModal(false);
-    setNewRelation({ sourceId: '', targetId: '', type: '' });
-  };
+    setShowAddModal(false)
+    setNewRelation({ sourceId: '', targetId: '', type: '' })
+  }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Relations</h1>
-        <button
+        <Button
           onClick={() => setShowAddModal(true)}
-          className="btn btn-primary flex items-center gap-2"
           disabled={!entities || entities.length < 2}
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 mr-2" />
           Add Relation
-        </button>
+        </Button>
       </div>
 
       {/* Relations List */}
-      <div className="card">
-        {isLoading ? (
-          <p className="text-gray-500">Loading...</p>
-        ) : !relations || relations.length === 0 ? (
-          <p className="text-gray-500">No relations found</p>
-        ) : (
-          <div className="divide-y">
-            {relations.map((relation: Relation) => (
-              <div
-                key={relation.id}
-                className="py-4 first:pt-0 last:pb-0 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="font-medium">
-                    {getEntityName(relation.sourceId)}
-                  </span>
-                  <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm">
-                    <ArrowRight className="w-4 h-4" />
-                    <span>{relation.type}</span>
-                  </div>
-                  <span className="font-medium">
-                    {getEntityName(relation.targetId)}
-                  </span>
-                </div>
-                <button
-                  onClick={() => deleteMutation.mutate(relation.id)}
-                  className="p-2 text-gray-400 hover:text-red-500"
-                  disabled={deleteMutation.isPending}
+      <Card>
+        <CardContent className="pt-6">
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          ) : !relations || relations.length === 0 ? (
+            <p className="text-muted-foreground">No relations found</p>
+          ) : (
+            <div className="divide-y">
+              {relations.map((relation: Relation) => (
+                <div
+                  key={relation.id}
+                  className="py-4 first:pt-0 last:pb-0 flex items-center justify-between"
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium">
+                      {getEntityName(relation.sourceId)}
+                    </span>
+                    <Badge variant="secondary" className="flex items-center gap-2">
+                      <ArrowRight className="w-4 h-4" />
+                      <span>{relation.type}</span>
+                    </Badge>
+                    <span className="font-medium">
+                      {getEntityName(relation.targetId)}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteMutation.mutate(relation.id)}
+                    disabled={deleteMutation.isPending}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Add Modal */}
-      <Modal
-        isOpen={showAddModal}
-        onClose={handleCloseModal}
-        title="Add Relation"
-        footer={
-          <>
-            <button onClick={handleCloseModal} className="btn btn-secondary">
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Relation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Source Entity</Label>
+              <Select
+                value={newRelation.sourceId}
+                onValueChange={(value) =>
+                  setNewRelation({ ...newRelation, sourceId: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select entity..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {entities?.map((entity: Entity) => (
+                    <SelectItem key={entity.id} value={entity.id}>
+                      {entity.name} ({entity.type})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Relation Type</Label>
+              <Input
+                value={newRelation.type}
+                onChange={(e) =>
+                  setNewRelation({ ...newRelation, type: e.target.value })
+                }
+                placeholder="e.g., works_at, knows, part_of"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Target Entity</Label>
+              <Select
+                value={newRelation.targetId}
+                onValueChange={(value) =>
+                  setNewRelation({ ...newRelation, targetId: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select entity..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {entities
+                    ?.filter((e: Entity) => e.id !== newRelation.sourceId)
+                    .map((entity: Entity) => (
+                      <SelectItem key={entity.id} value={entity.id}>
+                        {entity.name} ({entity.type})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={handleCloseModal}>
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => createMutation.mutate(newRelation)}
               disabled={
                 !newRelation.sourceId ||
@@ -128,66 +218,12 @@ export default function Relations() {
                 !newRelation.type.trim() ||
                 createMutation.isPending
               }
-              className="btn btn-primary"
             >
               {createMutation.isPending ? 'Creating...' : 'Create Relation'}
-            </button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="label">Source Entity</label>
-            <select
-              value={newRelation.sourceId}
-              onChange={(e) =>
-                setNewRelation({ ...newRelation, sourceId: e.target.value })
-              }
-              className="input"
-            >
-              <option value="">Select entity...</option>
-              {entities?.map((entity: Entity) => (
-                <option key={entity.id} value={entity.id}>
-                  {entity.name} ({entity.type})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="label">Relation Type</label>
-            <input
-              type="text"
-              value={newRelation.type}
-              onChange={(e) =>
-                setNewRelation({ ...newRelation, type: e.target.value })
-              }
-              placeholder="e.g., works_at, knows, part_of"
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label className="label">Target Entity</label>
-            <select
-              value={newRelation.targetId}
-              onChange={(e) =>
-                setNewRelation({ ...newRelation, targetId: e.target.value })
-              }
-              className="input"
-            >
-              <option value="">Select entity...</option>
-              {entities
-                ?.filter((e: Entity) => e.id !== newRelation.sourceId)
-                .map((entity: Entity) => (
-                  <option key={entity.id} value={entity.id}>
-                    {entity.name} ({entity.type})
-                  </option>
-                ))}
-            </select>
-          </div>
-        </div>
-      </Modal>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  );
+  )
 }

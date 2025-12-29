@@ -34,7 +34,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function Entities() {
   const queryClient = useQueryClient()
-  const [filterType, setFilterType] = useState<string>('')
+  const [filterType, setFilterType] = useState<string>('__all__')
   const [showAddModal, setShowAddModal] = useState(false)
   const [newEntity, setNewEntity] = useState({ type: 'person', name: '' })
   const [searchQuery, setSearchQuery] = useState('')
@@ -42,7 +42,7 @@ export default function Entities() {
 
   const { data: entities, isLoading } = useQuery({
     queryKey: ['entities', 'list', filterType],
-    queryFn: () => entityApi.list(filterType || undefined),
+    queryFn: () => entityApi.list(filterType === '__all__' ? undefined : filterType),
   })
 
   const { data: searchResults } = useQuery({
@@ -106,7 +106,7 @@ export default function Entities() {
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="__all__">All Types</SelectItem>
                 {ENTITY_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type.charAt(0).toUpperCase() + type.slice(1)}

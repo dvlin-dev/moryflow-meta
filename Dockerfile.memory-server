@@ -12,7 +12,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Copy memory workspace packages
-COPY memory/package.json ./memory/
+COPY memory/package.json memory/tsconfig.json ./memory/
 COPY memory/packages/core/package.json ./memory/packages/core/
 COPY memory/packages/server/package.json ./memory/packages/server/
 COPY memory/packages/server/prisma ./memory/packages/server/prisma/

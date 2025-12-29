@@ -1,5 +1,5 @@
-# Dockerfile for memory-server (monorepo build)
-# Build from root: docker build -t memory-server .
+# Dockerfile for memory-server
+# Build from moryflow-meta root: docker build -f memory/Dockerfile .
 
 FROM node:22-alpine AS builder
 
@@ -8,20 +8,21 @@ WORKDIR /app
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy workspace config
+# Copy workspace config from moryflow-meta root
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Copy all packages (needed for workspace resolution)
-COPY packages/core/package.json ./packages/core/
-COPY packages/server/package.json ./packages/server/
-COPY packages/server/prisma ./packages/server/prisma/
+# Copy memory workspace packages
+COPY memory/package.json ./memory/
+COPY memory/packages/core/package.json ./memory/packages/core/
+COPY memory/packages/server/package.json ./memory/packages/server/
+COPY memory/packages/server/prisma ./memory/packages/server/prisma/
 
-# Install all dependencies
+# Install dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
-COPY packages/core ./packages/core
-COPY packages/server ./packages/server
+COPY memory/packages/core ./memory/packages/core
+COPY memory/packages/server ./memory/packages/server
 
 # Build core first, then server
 RUN pnpm --filter @moryflow/memory-core build
@@ -38,25 +39,25 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy workspace config
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/core/package.json ./packages/core/
-COPY packages/server/package.json ./packages/server/
+COPY memory/package.json ./memory/
+COPY memory/packages/core/package.json ./memory/packages/core/
+COPY memory/packages/server/package.json ./memory/packages/server/
 
 # Install production dependencies only
 RUN pnpm install --prod --frozen-lockfile
 
 # Copy built artifacts
-COPY --from=builder /app/packages/core/dist ./packages/core/dist
-COPY --from=builder /app/packages/server/dist ./packages/server/dist
-COPY --from=builder /app/packages/server/src/generated ./packages/server/src/generated
-COPY --from=builder /app/packages/server/prisma ./packages/server/prisma
+COPY --from=builder /app/memory/packages/core/dist ./memory/packages/core/dist
+COPY --from=builder /app/memory/packages/server/dist ./memory/packages/server/dist
+COPY --from=builder /app/memory/packages/server/src/generated ./memory/packages/server/src/generated
+COPY --from=builder /app/memory/packages/server/prisma ./memory/packages/server/prisma
 
 # Copy entrypoint script
-COPY packages/server/docker-entrypoint.sh ./packages/server/
-RUN chmod +x ./packages/server/docker-entrypoint.sh
+COPY memory/packages/server/docker-entrypoint.sh ./memory/packages/server/
+RUN chmod +x ./memory/packages/server/docker-entrypoint.sh
 
-WORKDIR /app/packages/server
+WORKDIR /app/memory/packages/server
 
 EXPOSE 3000
 
-# Use entrypoint for auto-migration
 ENTRYPOINT ["./docker-entrypoint.sh"]

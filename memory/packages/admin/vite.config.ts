@@ -12,9 +12,12 @@ export default defineConfig({
   server: {
     port: 3001,
     proxy: {
+      // Proxy API requests to backend server
+      // Use API_URL env variable to specify backend address
       '/api': {
-        target: 'http://localhost:8765',
+        target: process.env.API_URL || 'http://localhost:8765',
         changeOrigin: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },

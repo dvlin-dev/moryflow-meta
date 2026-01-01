@@ -23,7 +23,8 @@ COPY memory/packages/admin ./memory/packages/admin
 
 # Build with environment variable
 # VITE_API_URL will be embedded into static files at build time
-ARG VITE_API_URL=http://localhost:8765
+# Default to production API URL (can be overridden with --build-arg)
+ARG VITE_API_URL=https://memory.moryflow.com
 ENV VITE_API_URL=$VITE_API_URL
 
 RUN pnpm --filter @moryflow/memory-admin build

@@ -21,7 +21,11 @@ RUN pnpm install --frozen-lockfile
 # Copy source code
 COPY memory/packages/admin ./memory/packages/admin
 
-# Build
+# Build with environment variable
+# VITE_API_URL will be embedded into static files at build time
+ARG VITE_API_URL=http://localhost:8765
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN pnpm --filter @moryflow/memory-admin build
 
 # Production stage with nginx
@@ -33,10 +37,6 @@ COPY --from=builder /app/memory/packages/admin/dist /usr/share/nginx/html
 # Copy nginx config
 COPY memory/packages/admin/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Default API URL (can be overridden by environment variable)
-ENV API_URL=http://localhost:3000
-
 EXPOSE 80
 
-# Replace API_URL_PLACEHOLDER with actual API_URL at runtime and start nginx
-CMD /bin/sh -c "sed -i \"s|API_URL_PLACEHOLDER|$API_URL|g\" /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+CMD ["nginx", "-g", "daemon off;"]

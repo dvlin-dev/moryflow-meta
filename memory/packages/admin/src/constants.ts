@@ -7,7 +7,8 @@
  */
 
 // API Configuration
-export const API_BASE = '/api';
+// VITE_API_URL is injected at build time via environment variable
+export const API_BASE = import.meta.env.VITE_API_URL ?? '';
 export const USER_ID = 'admin';
 
 // Entity types matching @moryflow/memory-core

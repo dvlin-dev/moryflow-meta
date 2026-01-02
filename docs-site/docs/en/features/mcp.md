@@ -53,7 +53,6 @@ Mory: [Using GitHub search]
 | GitHub | Search repos, view Issues, PRs |
 | Brave Search | Use Brave search engine |
 | Puppeteer | Control a browser |
-| Memory | Give Mory longer memory |
 
 Find more at the [official MCP repository](https://github.com/modelcontextprotocol/servers).
 

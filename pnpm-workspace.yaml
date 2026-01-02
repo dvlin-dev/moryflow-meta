@@ -1,5 +1,3 @@
 packages:
   - 'website'
   - 'docs-site'
-  - 'memory'
-  - 'memory/packages/*'

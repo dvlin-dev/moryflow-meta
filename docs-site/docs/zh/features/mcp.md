@@ -53,7 +53,6 @@ Mory：[用 GitHub 搜索]
 | GitHub | 搜仓库、看 Issue、PR |
 | Brave Search | 用 Brave 搜索引擎 |
 | Puppeteer | 控制浏览器 |
-| Memory | 让 Mory 有更长的记忆 |
 
 更多可以去 [MCP 官方仓库](https://github.com/modelcontextprotocol/servers) 找。
 

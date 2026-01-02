@@ -8,8 +8,7 @@ node_modules
 .vscode
 .idea
 
-# Not needed for memory-server
-website
+# Not needed for build
 docs-site
 docs
 
